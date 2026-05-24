@@ -1,0 +1,132 @@
+.nyroModalBg {
+	position: fixed;
+	overflow: hidden;
+   overflow-x: hidden; 
+   overflow-y: hidden;	
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background: #000;
+	opacity: 0.7;	
+}
+
+.nmReposition {
+	position: absolute;
+}
+
+.nyroModalCloseButton {
+	background:url(http://www.csinergia.net/images/x.png) no-repeat;
+	width:25px; 
+	height:29px; 
+	display:inline; 
+	z-index:3200; 	
+	position:absolute; 
+	top:-15px; 
+	right:-16px; 
+	text-indent: -9999em;	
+}
+
+.nyroModalTitle {
+	display: none;
+}
+
+.nyroModalCont {  	
+	height: auto; 
+	width: auto;
+	overflow: hidden;
+   overflow-x: hidden; 
+   overflow-y: hidden;		
+  	padding: 10px;
+  	background: #CCC;
+  	-webkit-border-radius:5px;
+  	-moz-border-radius:5px;
+  	border-radius:5px;
+  	position:relative;
+  	border:3px solid rgba(0,0,0,0);
+  	-webkit-border-radius:5px;
+  	-moz-border-radius:5px;
+  	border-radius:5px;
+  	-webkit-box-shadow:0 0 18px rgba(0,0,0,0.4);
+  	-moz-box-shadow:0 0 18px rgba(0,0,0,0.4);
+  	box-shadow:0 0 18px rgba(0,0,0,0.4);
+	
+  	  	
+}
+
+.nyroModalCont iframe {
+	height:auto; 
+	width:auto;
+}
+
+.nyroModalError {
+	border: 4px solid red;
+	color: red;
+	width: 250px;
+	height: 250px;
+}
+
+.nyroModalError div {
+	min-width: 100px;
+	min-height: 100px;
+	padding: 10px;
+}
+.nyroModalLink, .nyroModalDom, .nyroModalForm, .nyroModalFormFile {
+	position: relative;
+	overflow: hidden;
+   overflow-x: hidden; 
+   overflow-y: hidden;		
+	padding: 10px;
+	min-height: 100px;
+	min-width: 100px;
+	max-width: 1920px;	
+}
+.nyroModalImage, .nyroModalSwf, .nyroModalIframe, .nyroModalIframeForm {
+	position: relative;
+	overflow: hidden;
+}
+.nyroModalImage img {
+    vertical-align: top;
+}
+.nyroModalHidden {
+	left: -9999em;
+	top: -9999em;
+}
+.nyroModalLoad {
+	position: absolute;
+	width: 100px;
+	height: 100px;	
+	background: #fff url(img/ajaxLoader.gif) no-repeat center;
+	padding: 0;
+}
+.nyroModalPrev, .nyroModalNext {
+	outline: none;
+	position: absolute;
+	top: 0;
+	height: 60%;
+	width: 150px;
+	min-height: 50px;
+	max-height: 300px;
+	cursor: pointer;
+	text-indent: -9999em;
+	background: transparent url('data:image/gif;base64,AAAA') left 20% no-repeat;
+}
+.nyroModalImage .nyroModalPrev, .nyroModalImage .nyroModalNext {
+	height: 100%;
+	width: 40%;
+	max-height: none;
+}
+.nyroModalPrev {
+	left: 0;
+}
+.nyroModalPrev:hover {
+	background-image: url(img/prev.gif);
+}
+.nyroModalNext {
+	right: 0;
+	background-position: right 20%;
+}
+.nyroModalNext:hover {
+	background-position: right 20%;
+	background-image: url(img/next.gif);
+}
