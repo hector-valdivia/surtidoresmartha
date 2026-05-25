@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e4f3f0ac-a735-47f9-9f01-b0d59a9e7af6" name="Changes" comment="feat: Add public folder">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-    </list>
+    <list default="true" id="e4f3f0ac-a735-47f9-9f01-b0d59a9e7af6" name="Changes" comment="feat: Add public folder" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -261,7 +259,7 @@
       <option name="presentableId" value="Default" />
       <updated>1779612088366</updated>
       <workItem from="1779612089535" duration="4359000" />
-      <workItem from="1779664052196" duration="15802000" />
+      <workItem from="1779664052196" duration="15847000" />
     </task>
     <task id="LOCAL-00001" summary="Add all to the project">
       <option name="closed" value="true" />
@@ -295,7 +293,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779702898791</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feat: Add public folder">
+      <option name="closed" value="true" />
+      <created>1779702965115</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1779702965115</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
