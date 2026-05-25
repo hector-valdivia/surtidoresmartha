@@ -158,7 +158,7 @@
 					<td style="width:40%;"><?php echo $fila['descripcion']; ?></td>
 					<td>$<?php echo $fila['pu']; ?></td>
 					<td>$<?php echo $fila['costo']; ?></td>
-					<?php $subtotal+= $fila['costo']; ?>
+					<?php $subtotal+= cleanNumber($fila['costo']); ?>
 				</tr>
 			<?php endforeach; ?>
 		</tbody>

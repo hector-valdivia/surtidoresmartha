@@ -115,7 +115,7 @@
 								<?php echo $cliente->rfc; ?>
 							<?php else: ?>
 								No se encuentra este registro
-							<?php endif; ?>						
+							<?php endif; ?>
 						</td>
 					</tr>
 				</table>	
@@ -153,7 +153,7 @@
 						<tbody class="content">
 							<?php
 								//Inicializar total del costo
-								$total_costo = '';
+								$total_costo = 0;
 
 								//Busqueda del personal
 								$b = $con->prepare("SELECT * FROM aio_orden_personal WHERE folio=:folio");

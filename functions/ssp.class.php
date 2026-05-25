@@ -151,6 +151,7 @@ class SSP {
 		$globalSearch = array();
 		$columnSearch = array();
 		$dtColumns = self::pluck( $columns, 'dt' );
+        $request['columns'] = $request['columns'] ?? [];
 
 		if ( isset($request['search']) && $request['search']['value'] != '' ) {
 			$str = $request['search']['value'];
@@ -230,6 +231,7 @@ class SSP {
 	static function simple ( $request, $conn, $table, $primaryKey, $columns, $donde ){
 		$bindings = array();
 		$db = self::db( $conn );
+        $request['draw'] = $request['draw'] ?? 0;
 
 		// Build the SQL query string from the request
 		$limit = self::limit( $request, $columns );

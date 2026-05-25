@@ -58,6 +58,10 @@
 				$hora = date('H:i:s');
 				//Nota
 				$nota = base64_encode($_POST['nota']);
+                if (is_string($total_neto)){
+                    $total_neto = str_replace('$', '', $total_neto);
+                    $total_neto = str_replace(',', '', $total_neto);
+                }
 
 				$i = $con->prepare("INSERT INTO aio_cotizacion 
 					(id_cotizacion, id_usuario_creo, para, asunto, email_envio, email_cliente, fecha, hora, nota, atencion, total, id_sucursal)
@@ -179,6 +183,10 @@
 				$hora = date('H:i:s');
 				//Nota
 				$nota = base64_encode($_POST['nota']);
+                if (is_string($total_neto)){
+                    $total_neto = str_replace('$', '', $total_neto);
+                    $total_neto = str_replace(',', '', $total_neto);
+                }
 
 				$i = $con->prepare("INSERT INTO aio_cotizacion 
 					(id_cotizacion, id_usuario_creo, para, asunto, email_envio, email_cliente, fecha, hora, nota, atencion, total, id_sucursal)
@@ -255,6 +263,7 @@
 				SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion, total=:total
 				WHERE id_cotizacion=:id_cotizacion
 			");
+
 			$u->bindParam(':para', $para);
 			$u->bindParam(':asunto', $asunto_correo);
 			$u->bindParam(':email_envio', $mi_email);
@@ -264,7 +273,8 @@
 			$u->bindParam(':nota', $nota);
 			$u->bindParam(':atencion', $atencion);
 			$u->bindParam(':id_cotizacion',$id_cotizacion);
-			$u->bindParam(':total',$total_neto);
+            $total_neto = cleanNumber($total_neto);
+            $u->bindParam(':total', $total_neto);
 			$u->execute();
 
 			//Borrar toda la informacion de la cotizacion para volverla a escribir
@@ -296,8 +306,10 @@
 				$i->bindParam(':descripcion', $fila['descripcion']);
 				$i->bindParam(':cantidad', $fila['cantidad']);
 				$i->bindParam(':unidad', $fila['unidad']);
-				$i->bindParam(':pu', $fila['pu']);
-				$i->bindParam(':costo',$fila['costo']);
+                $fila_pu = cleanNumber($fila['pu']);
+                $i->bindParam(':pu', $fila_pu);
+                $fila_costo = cleanNumber($fila['costo']);
+                $i->bindParam(':costo', $fila_costo);
 				$i->execute();
 			}
 			// get the HTML
@@ -337,6 +349,10 @@
 				$fecha = date('Y-m-d');
 				//Hora
 				$hora = date('H:i:s');
+                if (is_string($total_neto)){
+                    $total_neto = str_replace('$', '', $total_neto);
+                    $total_neto = str_replace(',', '', $total_neto);
+                }
 
 				$u = $con->prepare("UPDATE aio_cotizacion 
 					SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion
@@ -458,6 +474,10 @@
 				$fecha = date('Y-m-d');
 				//Hora
 				$hora = date('H:i:s');
+                if (is_string($total_neto)){
+                    $total_neto = str_replace('$', '', $total_neto);
+                    $total_neto = str_replace(',', '', $total_neto);
+                }
 
 				$u = $con->prepare("UPDATE aio_cotizacion 
 					SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion
@@ -556,4 +576,3 @@
 	echo json_encode($data);
 
 	$con = null;
-?>

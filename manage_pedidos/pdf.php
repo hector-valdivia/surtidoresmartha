@@ -6,6 +6,16 @@ include('../funciones.php');
 
 registrado();
 
+function fecha_pdf_valida($fecha)
+{
+	return !empty($fecha) && substr($fecha, 0, 10) !== '0000-00-00';
+}
+
+function fecha_pdf($fecha)
+{
+	return fecha_pdf_valida($fecha) ? substr($fecha, 0, 10) : 'Sin Fecha';
+}
+
 //Conexion de BD
 $con = conecta();
 
@@ -19,9 +29,9 @@ if( $_GET ){
 
 //Limpiamos y sengriptamo $_GET[id]=id
 $id = limpiar( desencriptar($id) );
-
-//Si no ahi ningun ID enviamos al usario a table.php
-if ( empty($id) ) header("location: table.php");
+if ( empty($id) ){
+    header("location: table.php");
+}
 
 //id es igual al folio de la orden
 $b = $con->prepare("SELECT * FROM aio_orden WHERE folio=:folio");
@@ -35,7 +45,11 @@ $cliente = info_cliente($orden->id_cliente);
 $sucursal = info_sucursal($orden->sucursal);
 
 //Cantidad de tiempo entre dos fechas, para asignar el tiempo que tiene para terminarse la orden de trabajo
-$contar_dias = contardias_simple( $orden->fecha_orden, $orden->fecha_deseada );
+if (fecha_pdf_valida($orden->fecha_orden) && fecha_pdf_valida($orden->fecha_deseada)) {
+	$contar_dias = contar_dias_simple($orden->fecha_orden, $orden->fecha_deseada);
+} else {
+	$contar_dias = array('dias' => 'N/A');
+}
 
 //Diseño de la hoja del pdf
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,8 +152,8 @@ $html = '
 		</tr>
 
 		<tr>
-			<td style="text-align:center; vertical-align:middle;">'.substr($orden->fecha_orden,0,10).'</td>
-			<td style="text-align:center; vertical-align:middle;">'.substr($orden->fecha_deseada,0,10).'</td>
+			<td style="text-align:center; vertical-align:middle;">'.fecha_pdf($orden->fecha_orden).'</td>
+			<td style="text-align:center; vertical-align:middle;">'.fecha_pdf($orden->fecha_deseada).'</td>
 			<td style="text-align:center; vertical-align:middle;">'.$orden->prioridad.'</td>
 		</tr>
 	</table>
@@ -193,38 +207,26 @@ $html = '
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Seleccionamos la informacion de la tabla de personal de la orden, agrupandolos para asi sumar los dias trabajados para genera una lista
-$b = $con->prepare("SELECT id_personal,categoria,dia FROM aio_orden_personal WHERE folio=:folio GROUP BY id_personal,categoria,dia ORDER BY id_personal,dia");
+$b = $con->prepare("SELECT id_personal,categoria,dia,SUM(costo) AS costo,SUM(horas) AS horas FROM aio_orden_personal WHERE folio=:folio GROUP BY id_personal,categoria,dia ORDER BY id_personal,dia");
 $b->bindParam(':folio', $orden->folio);
 $b->execute();
 
 //Inicializar variables
 $personal 	 = '';
-$total_costo = '';
-$costo 		 = 0;
-$horas 		 = 0;
+$total_costo = 0;
 $i 			 = 0;
 
 while ( $r = $b->fetchObject() ){
 	$info_personal = info_personal( $r->id_personal );
-
-	$bp = $con->prepare("SELECT costo,horas FROM aio_orden_personal WHERE folio=:folio AND id_personal=:id_personal AND categoria=:categoria AND dia=:dia");
-	$bp->bindParam(':folio',$orden->folio);
-	$bp->bindParam(':id_personal',$r->id_personal);
-	$bp->bindParam(':categoria',$r->categoria);
-	$bp->bindParam(':dia',$r->dia);
-	$bp->execute();
-
-	while ( $rp = $bp->fetchObject() ){
-		$costo+= $rp->costo;
-		$horas+= $rp->horas;
-	}
+	$costo = $r->costo;
+	$horas = $r->horas;
 
 	if ( $horas != 0 ){
 		$personal.= 
 			'<tr>
 				<td style="text-align:left;">'.nombre_personal($r->id_personal).'</td>
 				<td class="center">'.$r->categoria .'</td>
-				<td class="center">'.$r->dia.'</td>
+				<td class="center">'.fecha_pdf($r->dia).'</td>
 				<td class="center">'.$horas .'</td>		
 				<td class="center">$'.$costo.'</td>
 			</tr>';
@@ -232,9 +234,6 @@ while ( $r = $b->fetchObject() ){
 		$total_costo+= $costo;
 		$i++;
 	}
-	
-	$costo = 0;
-	$horas = 0;
 }
 
 
@@ -263,7 +262,7 @@ $b->execute();
 
 $i=0;
 $material = '';
-$total_material = '';
+$total_material = 0;
 while ( $r = $b->fetchObject() ){
 	$material.= '
 		<tr>
@@ -329,7 +328,6 @@ $costo_total_reparacion = $total_costo+$total_material;
 
 $html.= '
 <page orientation="portrait" format="LETTER" backleft="7mm" backright="8mm">
-
 	<page_footer>
 		<table style="width:100%;">
 			<tr>
@@ -411,5 +409,3 @@ try{
 	$_SESSION['error'] = $e;
 	header('location:table.php');
 }
-
-?>

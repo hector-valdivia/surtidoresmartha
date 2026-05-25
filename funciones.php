@@ -1,11 +1,8 @@
 <?php
-
-	//Conexion de PDO
-	include( dirname(__FILE__).'/../bar.php');
+	include(__DIR__ . '/bar.php');
 
 	/////////////////////////////////////////////////////////////////////
-	define('_BASE_URL','http://sis.surtidoresmartha.com');
-	//define('_BASE_URL','http://localhost/sis.surtidoresmartha.com');
+	define('_BASE_URL', $aioWeb);
 	
 	/////////////////////////////////////////////////////////////////////
 	date_default_timezone_set('America/Chihuahua');
@@ -27,7 +24,7 @@
 
 		$fecha = explode('-',$fecha);
 
-		$mes = array(
+		$mes = [
 			'01' => 'Enero',
 			'02' => 'Febrero',
 			'03' => 'Marzo',
@@ -40,7 +37,7 @@
 			'10' => 'Octubre',
 			'11' => 'Noviembre',
 			'12' => 'Diciembre',
-		);
+		];
 
 		$fecha = $fecha[2].'/'.$mes[$fecha[1]].'/'.$fecha[0].$hora;
 
@@ -53,7 +50,7 @@
 	function fecha_espanol($fecha){
 		$fecha = explode('-',$fecha);
 
-		$mes = array(
+		$mes = [
 			'01' => 'Enero',
 			'02' => 'Febrero',
 			'03' => 'Marzo',
@@ -66,7 +63,7 @@
 			'10' => 'Octubre',
 			'11' => 'Noviembre',
 			'12' => 'Diciembre',
-		);
+		];
 
 		$fecha = $fecha[2].'/'.$mes[$fecha[1]].'/'.$fecha[0];
 
@@ -435,7 +432,7 @@
 	/* Funcion contar dias */
 	/////////////////////////////////////////////////////////////////////	
 	
-	function contardias_simple($fecha_inicial,$fecha_final){
+	function contar_dias_simple($fecha_inicial, $fecha_final){
 
 		//Fecha incial
 		$ini = explode(' ', $fecha_inicial); //Separar de la fecha de inicio la hora y el mes
@@ -821,30 +818,9 @@
 	///Dar formato de dinero
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	function dinero($number) { 
-		setlocale(LC_MONETARY, 'en_US');
-		$number = money_format('%(#10n',$number);
-		$number = str_replace('$','', $number);
-		$number = trim($number);
-		
-		return $number; 
-	} 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//funcion para resumir
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	function resumir($string, $limit, $break=".", $pad="…") {
-		// return with no change if string is shorter than $limit 
-		if(strlen($string) <= $limit)
-			return $string;
-		// is $break present between $limit and the end of the string? 
-		if(false !== ($breakpoint = strpos($string, $break, $limit))) {
-			if($breakpoint < strlen($string)-1) {
-				$string = substr($string, 0, $breakpoint) . $pad;
-			}
-		}
-		return $string;
+		return number_format((float) $number, 2, '.', ','); 
 	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -853,20 +829,20 @@
 	function fecha_nombre($fecha){
 		$fecha = explode('-', $fecha);
 
-		$mes = array(
-						'01' => 'Enero',
-						'02' => 'Febrero',
-						'03' => 'Marzo',
-						'04' => 'Abril',
-						'05' => 'Mayo',
-						'06' => 'Junio',
-						'07' => 'Julio',
-						'08' => 'Agosto',
-						'09' => 'Septiembre',
-						'10' => 'Octubre',
-						'11' => 'Noviembre',
-						'12' => 'Diciembre'
-					);
+		$mes = [
+			'01' => 'Enero',
+			'02' => 'Febrero',
+			'03' => 'Marzo',
+			'04' => 'Abril',
+			'05' => 'Mayo',
+			'06' => 'Junio',
+			'07' => 'Julio',
+			'08' => 'Agosto',
+			'09' => 'Septiembre',
+			'10' => 'Octubre',
+			'11' => 'Noviembre',
+			'12' => 'Diciembre'
+		];
 		return $fecha[0].' de '.$mes[$fecha[1]].' del '.$fecha[2];
 	}
 
@@ -898,21 +874,6 @@
 
 		return $random_chars;
 	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//funcion de objetos a array
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	function object2array($valor){//valor
-	    if(!(is_array($valor) || is_object($valor))){ //si no es un objeto ni un array
-	        $dato = $valor; //lo deja
-	    } else { //si es un objeto
-	        foreach($valor as $key => $valor1){ //lo conteo
-	            $dato[$key] = object2array($valor1); //
-	        }
-	    }
-	    return $dato;
-	}
-
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//funcion para encriptar
@@ -950,4 +911,17 @@
 		return $result;
 	}
 
-?>
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//funcion clean number
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	function cleanNumber($value)
+	{
+		if (is_numeric($value)) {
+			return $value;
+		} else {
+			$v = str_replace('$', '', $value);
+			$v = str_replace(',', '', $v);
+
+			return doubleval($v);
+		}
+	}

@@ -319,8 +319,9 @@ function WEBSITE_STATUS(){
     if(preg_match($pattern, $url) > 0)$status = '<td class="right_end green" style="color:#9C0; font-weight:bold;">online</td>'; 
     else $status = '<td class="right_end green" style="color:red; font-weight:bold;">Down</td>';
 	
-	$query_users_existing  = mysql_query("SELECT id_unica FROM usuarios WHERE id = '1'");
-	$Result_users_existing = mysql_num_rows($query_users_existing);
+	$con = conecta();
+	$query_users_existing = $con->query("SELECT COUNT(id_unica) FROM usuarios WHERE id = '1'");
+	$Result_users_existing = $query_users_existing->fetchColumn();
 	
 	$content='
 	      <tr>
