@@ -96,6 +96,10 @@
 			"processing": true,
 			"serverSide": true,
 			"info": false,
+			"order": [[0, "desc"]],
+			"columnDefs": [
+				{ "orderable": false, "targets": 7 }
+			],
 			"ajax":{ 
 				"url": "datatable.requisicion.php",
 				"type": "GET"

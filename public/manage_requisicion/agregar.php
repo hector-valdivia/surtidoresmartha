@@ -21,7 +21,11 @@
 
 			$cot = $b->fetchObject();
 		}
-	}else $id = '';
+	}else{
+        $id = '';
+        $cot = new stdClass();
+        $cot->bloqueada = null;
+    }
 ?>
 
 <!DOCTYPE HTML>
@@ -633,26 +637,24 @@
 								$.extend(form, descripcion);
 								$.extend(form, pedido);
 								//Enviar por ajax
-								$.customRequest(
-									'hacer',
-									form,
-									{
-										onSuccess: function(result) {
-											mensaje(result);
-											if ( result.hacer == "bloquear" ){
-												$(location).attr('href','agregar.php?id='+result.id_requisicion);
-											}else{
-												$('#enviar_requisicion #guardar').replaceWith(
-													$('<button />',{ 'type':'submit', 'class':'btn btn-lg btn-info enviar', 'name':'guardar', 'value':result.hacer, 'text':'Guardar'  })
-												);
+								$.customRequest('hacer', form, {
+									onSuccess: function(result) {
+										mensaje(result);
+										if ( result.hacer == "bloquear" ){
+											$(location).attr('href','agregar.php?id='+result.id_requisicion);
+										}else if ( result.hacer == "editar" ){
+											$(location).attr('href','/manage_requisicion/table.php');
+										}else{
+											$('#enviar_requisicion #guardar').replaceWith(
+												$('<button />',{ 'type':'submit', 'class':'btn btn-lg btn-info enviar', 'name':'guardar', 'value':result.hacer, 'text':'Guardar'  })
+											);
 
-												//Regrasa la id de la requisicion resien guardada
-												$('#enviar_requisicion #id_requisicion').val(result.id_requisicion);
-												//Mensaje de exito
-											}
+											//Regrasa la id de la requisicion resien guardada
+											$('#enviar_requisicion #id_requisicion').val(result.id_requisicion);
+											//Mensaje de exito
 										}
 									}
-								);
+								});
 							}else alert('No se ah agregado nada a la requisicion');
 						}
 					}
