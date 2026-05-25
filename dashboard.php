@@ -48,7 +48,7 @@
 			<a href="<?php echo _BASE_URL; ?>/manage_pedidos/table.php" class="big_button barcode"><span>+ Orden</span></a>
 			<a href="<?php echo _BASE_URL; ?>/manage_clientes/table.php" class="big_button cliente"><span>+ Clientes</span></a>			
 			<!--  <a href="<?php echo _BASE_URL; ?>/manage_trabajadores/table" class="big_button support"><span style="font-size:10px;">+Trabajadores</span></a> -->
-			<a href="<?php echo _BASE_URL; ?>/manage_users/table" class="big_button add_user"><span>Personal</span></a>
+			<a href="<?php echo _BASE_URL; ?>/manage_users/table.php" class="big_button add_user"><span>Personal</span></a>
 			<a href="<?php echo _BASE_URL; ?>/manage_sucursales/table.php" class="big_button key"><span>Sucursales</span></a>
 			<?php if ( $id == 96140 || $id == 86261 || $id == 12345 ): ?>
 				<a href="<?php echo _BASE_URL; ?>/manage_cotizacion/table.php" class="big_button support"><span>Cotizaciones</span></a>

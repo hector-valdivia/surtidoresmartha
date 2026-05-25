@@ -149,7 +149,7 @@
 									?>
 								</td>
 								<td class="align_left tools center">
-									<a href="editar?id=<?php echo encriptar($r->id_usuario); ?>"  target="_blank" class="view tip" title="Editar">Editar</a>
+									<a href="editar.php?id=<?php echo encriptar($r->id_usuario); ?>"  target="_blank" class="view tip" title="Editar">Editar</a>
 									<?php if ($evitar != 1): ?>
 										<a href="#borrar_<?php echo $r->id_usuario; ?>" class="popup delete tip" title="borrar">borrar</a>
 									<?php endif; ?>

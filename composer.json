@@ -1,0 +1,12 @@
+{
+    "name": "surtidores-martha/sistema",
+    "description": "Sistema interno de Surtidores Martha",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.0",
+        "ext-gd": "*",
+        "ext-mbstring": "*",
+        "spipu/html2pdf": "^5.3"
+    }
+}

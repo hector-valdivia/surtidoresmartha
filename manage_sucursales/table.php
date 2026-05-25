@@ -93,7 +93,7 @@
 								<td class="align_left"><?php echo $r->nombre; ?></td>
 								<td class="align_left center"><?php echo nombre_estado($r->estado).','.nombre_municipio($r->municipio,$r->estado).' '.$r->calle.' '.$r->colonia; ?></td>
 								<td class="align_left tools center">
-									<a href="editar?id=<?php echo encriptar($r->id_sucursal); ?>"  target="_blank" class="view tip" title="Editar">Editar</a>									
+									<a href="editar.php?id=<?php echo encriptar($r->id_sucursal); ?>"  target="_blank" class="view tip" title="Editar">Editar</a>
 									<a href="#borrar_<?php echo $r->id_sucursal; ?>" class="popup delete tip" title="Borrar">Borrar</a>									
 								</td>
 							</tr>
