@@ -9,7 +9,7 @@
 				<!-- User Dropdown Content: Start -->
 				<ul class="subnav">
 					<li><a href="<?php echo _BASE_URL; ?>/manage_users/table" class="icon settings">Conf. mi cuenta</a></li>   
-					<li><a href="<?php echo _BASE_URL; ?>/logout" class="icon lock">Salir del Sistema</a></li>  
+					<li><a href="<?php echo _BASE_URL; ?>/logout.php" class="icon lock">Salir del Sistema</a></li>  
 				</ul>  
 				<!-- User Dropdown Content: End -->
 			</li>

@@ -76,7 +76,7 @@ aio_load_env(__DIR__ . '/.env');
 $aioHost = aio_env('AIO_HOST');
 $aioDb = aio_env('AIO_DB');
 $aioDsn = aio_env('AIO_DSN', 'mysql:host=' . $aioHost . ';dbname=' . $aioDb);
-$aioWeb = aio_env('AIO_WEB');
+$aioWeb = aio_env('AIO_WEB', '');
 
 defined('AIO_HOST') || define('AIO_HOST', $aioHost);
 defined('AIO_DB') || define('AIO_DB', $aioDb);

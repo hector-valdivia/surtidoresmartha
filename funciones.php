@@ -96,7 +96,7 @@
 	function registrado(){
 		if(!isset($_SESSION['id'])){
 			$_SESSION['error'][] = "Debe iniciar session";
-			header('location: '._BASE_URL.'/main.php');
+			header('location: '._BASE_URL.'/index.php');
 		}else{
 			$con = conecta();
 
@@ -108,7 +108,7 @@
 			
 			if ( $b->fetchColumn() == 0 ){
 				$_SESSION['error'][] = "Debe iniciar session";		
-				header('location: '._BASE_URL.'/main.php');
+				header('location: '._BASE_URL.'/index.php');
 			}
 		}
 	}
@@ -130,7 +130,7 @@
 		if( $nivel != $comparado){			
 			session_destroy();
 			$_SESSION['error'][] = "Debe iniciar session";
-			header('location: '._BASE_URL.'/main.php');		
+			header('location: '._BASE_URL.'/index.php');		
 		}
 	}
 
