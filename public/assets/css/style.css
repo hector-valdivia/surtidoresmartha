@@ -112,18 +112,18 @@ body {
 #userpanel ul li ul.subnav {
 	background-image:url(../img/bg_texture.png);
 	border-width:1px;
-	border-top-width:0px;
+	border-top-width:0;
 	border-style:solid;
 	list-style: none;
 	margin:0 0 0 -20px;
-	top: 80px;
+	top: 28px;
 	padding:5px 10px 15px 10px;
 	display: none;
 	font-size:12px;
 	width:auto;
 	height:auto;
 	z-index:8000;
-	position: fixed;
+	position: absolute;
 	
 	/* CSS3 */
 	-webkit-border-radius:0 0 5px 5px;
@@ -1763,4 +1763,35 @@ ul#navigation a.point_right, .icon.point_right	{ background-image:url(../img/ico
 	border-left: solid 1px rgba(0, 0, 0, 0.35);
 	border-bottom: solid 1px rgba(255, 255, 255, 0.1);
 	border-right: solid 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Keep the account dropdown above the header. */
+#wrap,
+#userpanel,
+#userpanel ul.dropdown,
+#userpanel li.topnav {
+	overflow: visible;
+}
+
+#userpanel {
+	position: relative;
+	z-index: 10000;
+}
+
+#userpanel ul.dropdown,
+#userpanel li.topnav {
+	position: relative;
+	z-index: 10001;
+}
+
+#userpanel ul li ul.subnav {
+	position: absolute;
+	top: 28px;
+	left: 0;
+	z-index: 10002;
+}
+
+#header {
+	position: relative;
+	z-index: 1;
 }
