@@ -6,8 +6,8 @@
 			<!-- User Name -->
 			<a href="#" class="top icon user"><?php echo apellido($_SESSION['id']); ?></a>
             <ul class="subnav" style="display: none; ">
-				<li><a href="/manage_users/table.php" class="icon settings">Conf. mi cuenta</a></li>
-				<li><a href="/logout.php" class="icon lock">Salir del Sistema</a></li>
+				<li><a href="/manage_users/editar.php?id=<?php echo $_SESSION['id']; ?>" class="icon settings">Mi cuenta</a></li>
+				<li><a href="/logout.php" class="icon lock">Logout</a></li>
 			</ul>
 		</li>
 	</ul>
