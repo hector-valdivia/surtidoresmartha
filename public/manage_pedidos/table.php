@@ -101,12 +101,12 @@
 ?>
 <script type="text/javascript">
 	$(document).ready(function($) {
-		var $tipo = 'abierto';
+		let $tipo = 'abierto';
 
 		/*===========================================================*/
 		/*	Datatable
 		/*===========================================================*/
-		var $tabla = $('#ordenes').DataTable({
+		const $tabla = $('#ordenes').DataTable({
 			"processing": true,
 			"serverSide": true,
 			"info": false,

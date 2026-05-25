@@ -45,21 +45,30 @@ $columns = array(
 );
  
 // SQL server connection information
-$sql_details = array(
+$sql_details = [
     'user' => _AIO_USER,
     'pass' => _AIO_PASS,
     'db'   => AIO_DB,
     'host' => AIO_HOST
-);
+];
  
 require(__DIR__ . "/../../functions/ssp.class.php");
 
-//$where = 'AND sucursal="'.$sucursal->id_sucursal.'"';
+$request = !empty($_POST) ? $_POST : $_GET;
+$tipo = $request['tipo'] ?? 'abierto';
+$tiposPermitidos = ['abierto', 'vencido', 'cancelado', 'terminado', 'todos'];
 
-//if ( !empty($_POST['tipo']) && $_POST['tipo'] != 'todos' ) $where.= ' AND estado_orden="'.$_POST['tipo'].'"';
+if ( !in_array($tipo, $tiposPermitidos, true) ) {
+    $tipo = 'abierto';
+}
 
-$where = 'AND estado_orden="'.$_POST['tipo'].'"';
+//$where = 'AND sucursal='.$sucursal->id_sucursal;
+
+$where = null;
+if ( $tipo != 'todos' ) {
+    $where = "AND estado_orden='".$tipo."'";
+}
 
 echo json_encode(
-    SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $where )
+    SSP::simple( $request, $sql_details, $table, $primaryKey, $columns, $where )
 );
