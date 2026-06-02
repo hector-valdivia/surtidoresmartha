@@ -2,6 +2,7 @@
 
 //Funciones requeridas
 require_once(__DIR__ . "/../../funciones.php");
+require_once(__DIR__ . "/../../functions/ssp.class.php");
 
 session_start();
 //Get de sucursal de la session
@@ -51,8 +52,6 @@ $sql_details = [
     'db'   => AIO_DB,
     'host' => AIO_HOST
 ];
- 
-require(__DIR__ . "/../../functions/ssp.class.php");
 
 $request = !empty($_POST) ? $_POST : $_GET;
 $tipo = $request['tipo'] ?? 'abierto';

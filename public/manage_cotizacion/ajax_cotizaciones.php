@@ -2,6 +2,7 @@
 
 //Funciones requeridas
 require_once(__DIR__ . "/../../funciones.php");
+require_once(__DIR__ . "/../../functions/ssp.class.php");
 
 session_start();
 //Get de sucursal de la session
@@ -57,9 +58,10 @@ $sql_details = array(
     'db'   => AIO_DB,
     'host' => AIO_HOST
 );
- 
-require(__DIR__ . "/../../functions/ssp.class.php");
+
+$id_sucursal = preg_replace('/[^A-Za-z0-9_-]/', '', $sucursal->id_sucursal);
+$where = "AND id_sucursal='".$id_sucursal."'";
 
 echo json_encode(
-    SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $where = 'AND id_sucursal="'.$sucursal->id_sucursal.'"' )
+    SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $where )
 );

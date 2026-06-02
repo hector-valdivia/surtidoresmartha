@@ -101,7 +101,8 @@ require_once(__DIR__ . "/../../functions/ssp.class.php");
 $where = null;
 if ( !user_nivel($nivel=1, $con) ){
 	$sucursal = sucursal();	
-	$r = SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $where = 'AND id_sucursal="'.$sucursal->id_sucursal.'"' );
+	$id_sucursal = preg_replace('/[^A-Za-z0-9_-]/', '', $sucursal->id_sucursal);
+	$where = "AND id_sucursal='".$id_sucursal."'";
 }
 
 echo json_encode(SSP::simple( $_GET, $sql_details, $table, $primaryKey, $columns, $where ));
