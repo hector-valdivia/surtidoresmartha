@@ -916,12 +916,38 @@
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	function cleanNumber($value)
 	{
+		if ($value === null || $value === '') {
+			return 0;
+		}
+
 		if (is_numeric($value)) {
 			return $value;
-		} else {
-			$v = str_replace('$', '', $value);
-			$v = str_replace(',', '', $v);
-
-			return doubleval($v);
 		}
+
+		$value = trim((string) $value);
+		$value = str_replace(array('$', ' ', "\xc2\xa0"), '', $value);
+
+		$lastComma = strrpos($value, ',');
+		$lastDot = strrpos($value, '.');
+
+		if ($lastComma !== false && $lastDot !== false) {
+			if ($lastComma > $lastDot) {
+				$value = str_replace('.', '', $value);
+				$value = str_replace(',', '.', $value);
+			} else {
+				$value = str_replace(',', '', $value);
+			}
+		} elseif ($lastComma !== false) {
+			if (substr_count($value, ',') > 1 || preg_match('/^-?\d{1,3},\d{3}$/', $value)) {
+				$value = str_replace(',', '', $value);
+			} else {
+				$value = str_replace(',', '.', $value);
+			}
+		} elseif (substr_count($value, '.') > 1) {
+			$value = str_replace('.', '', $value);
+		}
+
+		$value = preg_replace('/[^0-9.\-]/', '', $value);
+
+		return is_numeric($value) ? $value : 0;
 	}

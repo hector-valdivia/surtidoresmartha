@@ -48,6 +48,7 @@
 				
 				//Si no se encontraron resultados prosigue
 				if($numero == 0){
+					$salario = cleanNumber($salario);
 					
 					//Insertar la informacion del usuario en la bd
 					$i = $con->prepare("INSERT INTO aio_personal (id_usuario,nombre,apellido,telefono,email,password,nivel,sucursal,salario,categoria) VALUES (:id_usuario,:nombre,:apellido,:telefono,:email,:password,:nivel,:sucursal,:salario,:categoria)");
@@ -140,12 +141,14 @@
 				}
 
 				//Si no tiene o se le quita acceseso al sistema, se limpia el campo de correo y se coloca un password random
-				if( $acceseso == 0 ){ 
+				if( $acceseso == 0 ){
 					$nivel = 0;
 					$email = '';
 					$password  = encriptar( str_pad(letra_rand(10), 10, '0', STR_PAD_LEFT) );
 					$password2 = $password;
 				}
+
+				$salario = cleanNumber($salario);
 
 				///Actualizar BD con la nueva informacion del personal
 				$u = $con->prepare("UPDATE aio_personal SET

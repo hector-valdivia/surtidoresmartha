@@ -163,6 +163,8 @@ switch ( $hacer ) {
 	break;
 
 	case 'material':
+		$cantidad = cleanNumber($cantidad);
+		$costo = cleanNumber($costo);
 
 		$i = $con->prepare("INSERT INTO aio_orden_material (folio,material,cantidad,unidad,costo) VALUES (:folio,:material,:cantidad,:unidad,:costo)");
 		$i->bindParam(':folio',$folio);
@@ -179,11 +181,12 @@ switch ( $hacer ) {
 	break;
 
 	case 'trabajador':
+		$horas = cleanNumber($horas);
 		$b = $con->prepare("SELECT salario FROM aio_personal WHERE id_usuario=:planeador AND id!=1");
 		$b->bindParam(':planeador',$trabajador);
 		$b->execute();
 		$r = $b->fetchObject();
-		$costo = $r->salario*$horas;
+		$costo = cleanNumber($r->salario)*$horas;
 
 		$i = $con->prepare("INSERT INTO aio_orden_personal (folio,id_personal,categoria,dia,horas,costo) VALUES (:folio,:id_personal,:categoria,:dia,:horas,:costo)");
 		$i->bindParam(':folio',$folio);
@@ -201,6 +204,7 @@ switch ( $hacer ) {
 	break;
 
 	case 'herramienta':
+		$cantidad = cleanNumber($cantidad);
 		$i = $con->prepare("INSERT INTO aio_orden_herramienta (folio,herramienta,cantidad) VALUES (:folio,:herramienta,:cantidad)");
 		$i->bindParam(':folio',$folio);
 		$i->bindParam(':herramienta',$herramienta);

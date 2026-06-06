@@ -117,15 +117,18 @@
 					VALUES
 					(:id_requisicion, :material, :cantidad, :unidad, :precio_unitario, :iva, :proveedor, :direccion, 'espera', :telefono, :email)
 				");
-				//Se manda de manera serializada las cotizaciones creadas				
+				//Se manda de manera serializada las cotizaciones creadas
 				foreach ($req as $requi) {
 					$requi = json_decode( stripslashes($requi) );
+					$cantidad = cleanNumber($requi->cantidad);
+					$precio_unitario = cleanNumber($requi->precio_unitario);
+					$iva = cleanNumber($requi->iva);
 					$i->bindParam(':id_requisicion', $id_requisicion);
 					$i->bindParam(':material',$requi->material);
-					$i->bindParam(':cantidad',$requi->cantidad);
+					$i->bindParam(':cantidad',$cantidad);
 					$i->bindParam(':unidad',$requi->unidad);
-					$i->bindParam(':precio_unitario',$requi->precio_unitario);
-					$i->bindParam(':iva',$requi->iva);
+					$i->bindParam(':precio_unitario',$precio_unitario);
+					$i->bindParam(':iva',$iva);
 					$i->bindParam(':proveedor',$requi->proveedor);
 					$i->bindParam(':direccion',$requi->direccion);
 					$i->bindParam(':telefono',$requi->telefono);
@@ -231,15 +234,18 @@
 					VALUES
 					(:id_requisicion, :material, :cantidad, :unidad, :precio_unitario, :iva, :proveedor, :direccion, 'espera', :telefono, :email)
 				");
-				//Se manda de manera serializada las cotizaciones creadas				
+				//Se manda de manera serializada las cotizaciones creadas
 				foreach ($req as $requi) {
 					$requi = json_decode( stripslashes($requi) );
+					$cantidad = cleanNumber($requi->cantidad);
+					$precio_unitario = cleanNumber($requi->precio_unitario);
+					$iva = cleanNumber($requi->iva);
 					$i->bindParam(':id_requisicion', $id_requisicion);
 					$i->bindParam(':material',$requi->material);
-					$i->bindParam(':cantidad',$requi->cantidad);
+					$i->bindParam(':cantidad',$cantidad);
 					$i->bindParam(':unidad',$requi->unidad);
-					$i->bindParam(':precio_unitario',$requi->precio_unitario);
-					$i->bindParam(':iva',$requi->iva);
+					$i->bindParam(':precio_unitario',$precio_unitario);
+					$i->bindParam(':iva',$iva);
 					$i->bindParam(':proveedor',$requi->proveedor);
 					$i->bindParam(':direccion',$requi->direccion);
 					$i->bindParam(':telefono',$requi->telefono);
@@ -348,17 +354,20 @@
 				$s = 0;
 				foreach ($req as $requi) {
 					$requi = json_decode( stripslashes($requi) );
+					$cantidad = cleanNumber($requi->cantidad);
+					$precio_unitario = cleanNumber($requi->precio_unitario);
+					$iva = cleanNumber($requi->iva);
 					$i->bindParam(':id_requisicion', $id_requisicion);
 					$i->bindParam(':material',$requi->material);
-					$i->bindParam(':cantidad',$requi->cantidad);
+					$i->bindParam(':cantidad',$cantidad);
 					$i->bindParam(':unidad',$requi->unidad);
-					$i->bindParam(':precio_unitario',$requi->precio_unitario);
+					$i->bindParam(':precio_unitario',$precio_unitario);
 					$i->bindParam(':proveedor',$requi->proveedor);
 					$i->bindParam(':direccion',$requi->direccion);
 					$i->bindParam(':status',$status[$s]);
 					$i->bindParam(':telefono',$requi->telefono);
 					$i->bindParam(':email',$requi->email);
-					$i->bindParam(':iva',$requi->iva);
+					$i->bindParam(':iva',$iva);
 					$i->execute();
 					$s++;
 				}

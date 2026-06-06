@@ -88,7 +88,7 @@
 				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
 					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-					$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+					$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
 					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
 					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 				};
@@ -180,10 +180,7 @@
 				$hora = date('H:i:s');
 				//Nota
 				$nota = base64_encode($_POST['nota']);
-                if (is_string($total_neto)){
-                    $total_neto = str_replace('$', '', $total_neto);
-                    $total_neto = str_replace(',', '', $total_neto);
-                }
+                $total_neto = cleanNumber($total_neto);
 
 				$i = $con->prepare("INSERT INTO aio_cotizacion 
 					(id_cotizacion, id_usuario_creo, para, asunto, email_envio, email_cliente, fecha, hora, nota, atencion, total, id_sucursal)
@@ -213,7 +210,7 @@
 				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
 					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-					$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+					$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
 					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
 					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 				};
@@ -288,7 +285,7 @@
 			for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 				$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
 				$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-				$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+				$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
 				$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
 				$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 			};
@@ -346,10 +343,7 @@
 				$fecha = date('Y-m-d');
 				//Hora
 				$hora = date('H:i:s');
-                if (is_string($total_neto)){
-                    $total_neto = str_replace('$', '', $total_neto);
-                    $total_neto = str_replace(',', '', $total_neto);
-                }
+                $total_neto = cleanNumber($total_neto);
 
 				$u = $con->prepare("UPDATE aio_cotizacion 
 					SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion
@@ -379,7 +373,7 @@
 				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
 					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-					$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+					$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
 					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
 					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 				};
@@ -471,10 +465,7 @@
 				$fecha = date('Y-m-d');
 				//Hora
 				$hora = date('H:i:s');
-                if (is_string($total_neto)){
-                    $total_neto = str_replace('$', '', $total_neto);
-                    $total_neto = str_replace(',', '', $total_neto);
-                }
+                $total_neto = cleanNumber($total_neto);
 
 				$u = $con->prepare("UPDATE aio_cotizacion 
 					SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion
@@ -504,7 +495,7 @@
 				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
 					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-					$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+					$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
 					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
 					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 				};
