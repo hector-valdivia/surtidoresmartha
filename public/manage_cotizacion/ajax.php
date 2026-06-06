@@ -58,10 +58,7 @@
 				$hora = date('H:i:s');
 				//Nota
 				$nota = base64_encode($_POST['nota']);
-                if (is_string($total_neto)){
-                    $total_neto = str_replace('$', '', $total_neto);
-                    $total_neto = str_replace(',', '', $total_neto);
-                }
+                $total_neto = cleanNumber($total_neto);
 
 				$i = $con->prepare("INSERT INTO aio_cotizacion 
 					(id_cotizacion, id_usuario_creo, para, asunto, email_envio, email_cliente, fecha, hora, nota, atencion, total, id_sucursal)
@@ -90,10 +87,10 @@
 				//Generar las filas y acomodar la informacion
 				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-					$row[$j]['cantidad'] 	= $tabla[$i]['cantidad'];
-					$row[$j]['unidad'] 		= str_replace('$', '', $tabla[$i]['unidad']);
-					$row[$j]['pu']			= str_replace('$', '', $tabla[$i]['pu']);
-					$row[$j]['costo'] 		= str_replace('$', '', $tabla[$i]['costo']);
+					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
+					$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
+					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 				};
 
 				foreach ($row as $fila) {
@@ -215,10 +212,10 @@
 				//Generar las filas y acomodar la informacion
 				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-					$row[$j]['cantidad'] 	= $tabla[$i]['cantidad'];
-					$row[$j]['unidad'] 		= str_replace('$', '', $tabla[$i]['unidad']);
-					$row[$j]['pu']			= str_replace('$', '', $tabla[$i]['pu']);
-					$row[$j]['costo'] 		= str_replace('$', '', $tabla[$i]['costo']);
+					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
+					$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
+					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 				};
 
 				foreach ($row as $fila) {
@@ -290,10 +287,10 @@
 			//Generar las filas y acomodar la informacion
 			for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 				$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-				$row[$j]['cantidad'] 	= $tabla[$i]['cantidad'];
-				$row[$j]['unidad'] 		= str_replace('$', '', $tabla[$i]['unidad']);
-				$row[$j]['pu']			= str_replace('$', '', $tabla[$i]['pu']);
-				$row[$j]['costo'] 		= str_replace('$', '', $tabla[$i]['costo']);
+				$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
+				$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+				$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
+				$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 			};
 
 			foreach ($row as $fila) {
@@ -381,10 +378,10 @@
 				//Generar las filas y acomodar la informacion
 				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-					$row[$j]['cantidad'] 	= $tabla[$i]['cantidad'];
-					$row[$j]['unidad'] 		= str_replace('$', '', $tabla[$i]['unidad']);
-					$row[$j]['pu']			= str_replace('$', '', $tabla[$i]['pu']);
-					$row[$j]['costo'] 		= str_replace('$', '', $tabla[$i]['costo']);
+					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
+					$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
+					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 				};
 
 				foreach ($row as $fila) {
@@ -506,10 +503,10 @@
 				//Generar las filas y acomodar la informacion
 				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
 					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-					$row[$j]['cantidad'] 	= $tabla[$i]['cantidad'];
-					$row[$j]['unidad'] 		= str_replace('$', '', $tabla[$i]['unidad']);
-					$row[$j]['pu']			= str_replace('$', '', $tabla[$i]['pu']);
-					$row[$j]['costo'] 		= str_replace('$', '', $tabla[$i]['costo']);
+					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
+					$row[$j]['unidad'] 		= cleanNumber($tabla[$i]['unidad']);
+					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
+					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
 				};
 
 				foreach ($row as $fila) {
