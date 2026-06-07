@@ -8,6 +8,7 @@
         "ext-gd": "*",
         "ext-mbstring": "*",
         "spipu/html2pdf": "^5.3",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "phpmailer/phpmailer": "^7.1"
     }
 }

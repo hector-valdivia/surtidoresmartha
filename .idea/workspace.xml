@@ -1,15 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e4f3f0ac-a735-47f9-9f01-b0d59a9e7af6" name="Changes" comment="feat: Add public folder">
+    <list default="true" id="e4f3f0ac-a735-47f9-9f01-b0d59a9e7af6" name="Changes" comment="fix: Simplify number cleaning by using cleanNumber function">
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/manage_requisicion/agregar.php" beforeDir="false" afterPath="$PROJECT_DIR$/public/manage_requisicion/agregar.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/manage_requisicion/table.php" beforeDir="false" afterPath="$PROJECT_DIR$/public/manage_requisicion/table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" afterPath="$PROJECT_DIR$/composer.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/html2pdf/html2pdf.class.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/PHPMailerAutoload.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/changelog.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/class.phpmailer.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/class.pop3.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/class.smtp.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/composer.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-ar.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-be.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-br.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-ca.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-ch.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-cz.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-de.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-dk.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-el.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-eo.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-es.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-et.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-fa.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-fi.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-fo.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-fr.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-gl.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-he.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-hr.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-hu.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-it.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-ja.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-ka.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-lt.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-lv.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-nl.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-no.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-pl.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-pt.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-ro.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-ru.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-se.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-sk.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-sr.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-tr.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-uk.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-vi.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-zh.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/language/phpmailer.lang-zh_cn.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/test/bootstrap.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/test/fakepopserver.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/test/fakesendmail.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/test/phpmailerLangTest.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/test/phpmailerTest.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/test/runfakepopserver.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/test/test_callback.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/test/testbootstrap-dist.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/phpmailer/travis.phpunit.xml.dist" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/js.php" beforeDir="false" afterPath="$PROJECT_DIR$/modules/js.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/manage_cotizacion/agregar.php" beforeDir="false" afterPath="$PROJECT_DIR$/public/manage_cotizacion/agregar.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/manage_cotizacion/ajax.php" beforeDir="false" afterPath="$PROJECT_DIR$/public/manage_cotizacion/ajax.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/manage_cotizacion/ajax_cotizaciones.php" beforeDir="false" afterPath="$PROJECT_DIR$/public/manage_cotizacion/ajax_cotizaciones.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerConfigs">
+    <option name="configs">
+      <option value="$PROJECT_DIR$/functions/phpmailer/composer.json" />
+    </option>
   </component>
   <component name="ComposerSettings" synchronizationState="SYNCHRONIZE">
     <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
@@ -37,6 +104,11 @@
     <persistenceIdMap>
       <entry key="_/Users/hvaldivia/Herd/surtidoresmartha" value="3EACfFXpFBmNyvqIUTxmxrHAP8F" />
     </persistenceIdMap>
+  </component>
+  <component name="DatabaseLocalColorSettings">
+    <colors>
+      <entry key="ae3e42d4-f6c3-44f9-bbff-48d8b6cd9f01" value="Blue" />
+    </colors>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -203,6 +275,9 @@
       <path value="$PROJECT_DIR$/vendor/laravel/wayfinder" />
       <path value="$PROJECT_DIR$/vendor/laravel/agent-detector" />
       <path value="$PROJECT_DIR$/vendor/laravel/framework" />
+      <path value="$PROJECT_DIR$/vendor/spipu/html2pdf" />
+      <path value="$PROJECT_DIR$/vendor/tecnickcom/tcpdf" />
+      <path value="$PROJECT_DIR$/vendor/phpmailer/phpmailer" />
     </include_path>
   </component>
   <component name="ProjectColorInfo">{
@@ -214,27 +289,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "/Users/hvaldivia/Herd/surtidoresmartha/public",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.highlight.mappings&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.highlight.symlinks&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.show.date&quot;: &quot;false&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.show.permissions&quot;: &quot;false&quot;,
+    &quot;WebServerToolWindowPanel.toolwindow.show.size&quot;: &quot;false&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/hvaldivia/Herd/surtidoresmartha/public&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/public" />
@@ -263,7 +343,10 @@
       <option name="presentableId" value="Default" />
       <updated>1779612088366</updated>
       <workItem from="1779612089535" duration="4359000" />
-      <workItem from="1779664052196" duration="17107000" />
+      <workItem from="1779664052196" duration="31001000" />
+      <workItem from="1779809280569" duration="17000" />
+      <workItem from="1780411480129" duration="1388000" />
+      <workItem from="1780698151807" duration="13604000" />
     </task>
     <task id="LOCAL-00001" summary="Add all to the project">
       <option name="closed" value="true" />
@@ -313,7 +396,71 @@
       <option name="project" value="LOCAL" />
       <updated>1779703005210</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="fix: Improve handling of requisition states and enhance table sorting">
+      <option name="closed" value="true" />
+      <created>1779704311953</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1779704311953</updated>
+    </task>
+    <task id="LOCAL-00008" summary="fix: Improve handling of requisition states and enhance table sorting">
+      <option name="closed" value="true" />
+      <created>1779725395921</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1779725395921</updated>
+    </task>
+    <task id="LOCAL-00009" summary="fix: Improve handling of requisition states and enhance table sorting">
+      <option name="closed" value="true" />
+      <created>1779729845320</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1779729845320</updated>
+    </task>
+    <task id="LOCAL-00010" summary="fix: Update user account link and logout text in menu">
+      <option name="closed" value="true" />
+      <created>1779730249474</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1779730249474</updated>
+    </task>
+    <task id="LOCAL-00011" summary="fix: Update user account link and logout text in menu">
+      <option name="closed" value="true" />
+      <created>1779739168420</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1779739168420</updated>
+    </task>
+    <task id="LOCAL-00012" summary="fix: Refactor SSP class inclusion and improve requisition filtering">
+      <option name="closed" value="true" />
+      <created>1780412044239</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1780412044239</updated>
+    </task>
+    <task id="LOCAL-00013" summary="fix: Simplify number cleaning by using cleanNumber function">
+      <option name="closed" value="true" />
+      <created>1780768090609</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1780768090609</updated>
+    </task>
+    <task id="LOCAL-00014" summary="fix: Simplify number cleaning by using cleanNumber function">
+      <option name="closed" value="true" />
+      <created>1780769395041</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1780769395041</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -323,7 +470,22 @@
     <MESSAGE value="Add all to the project" />
     <MESSAGE value="Rename main.php to index.php, add .gitignore and .env.example files, update PHP language level in php.xml, and refactor code for better number handling in multiple files." />
     <MESSAGE value="feat: Add public folder" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Add public folder" />
+    <MESSAGE value="fix: Improve handling of requisition states and enhance table sorting" />
+    <MESSAGE value="fix: Update user account link and logout text in menu" />
+    <MESSAGE value="fix: Refactor SSP class inclusion and improve requisition filtering" />
+    <MESSAGE value="fix: Simplify number cleaning by using cleanNumber function" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: Simplify number cleaning by using cleanNumber function" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/public/manage_cotizacion/ajax.php</url>
+          <line>321</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

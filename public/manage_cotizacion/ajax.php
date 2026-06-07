@@ -1,12 +1,210 @@
 <?php
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\SMTP;
+    use PHPMailer\PHPMailer\Exception;
+    use Spipu\Html2Pdf\Html2Pdf;
+
+    require(__DIR__ . "/../../vendor/autoload.php");
+
 	session_start();
 	require(__DIR__ . "/../../funciones.php");
 
-	// Comprobar si la página se cargo con AJAX.
-	if ( strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) != 'xmlhttprequest' ) die( 'No acceda a esta p&aacute;gina directamente desde su navegador.' );
+	// Comprobar si la pagina se cargo con AJAX.
+	if ( !isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) != 'xmlhttprequest' ) die( 'No acceda a esta p&aacute;gina directamente desde su navegador.' );
 
 	// Tipo de archivo: JSON.
 	header( 'Content-type: application/json' );
+
+	function postCotizacion($key)
+	{
+		return isset($_POST[$key]) ? limpiar($_POST[$key]) : '';
+	}
+
+	function datosCotizacion($total_neto)
+	{
+		return [
+            'para' => postCotizacion('para'),
+            'asunto' => postCotizacion('asunto_correo'),
+            'email_envio' => postCotizacion('mi_email'),
+            'email_cliente' => postCotizacion('cliente_email'),
+            'fecha' => date('Y-m-d'),
+            'hora' => date('H:i:s'),
+            'nota' => base64_encode(isset($_POST['nota']) ? $_POST['nota'] : ''),
+            'atencion' => postCotizacion('atencion'),
+            'total' => cleanNumber($total_neto),
+        ];
+	}
+
+		function conceptosCotizacion()
+		{
+		$tabla = json_decode(stripslashes(isset($_GET['action']) ? $_GET['action'] : ''), true);
+		if ( empty($tabla) || count($tabla) == 0 ) {
+			throw new Exception("No se agrego ningún concepto a la cotización");
+		}
+
+		$row = array();
+		for ($i = 1, $j = 0; $i < count($tabla) - 1; $i++, $j++) {
+			$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
+			$row[$j]['cantidad'] = cleanNumber($tabla[$i]['cantidad']);
+			$row[$j]['unidad'] = $tabla[$i]['unidad'];
+			$row[$j]['pu'] = cleanNumber($tabla[$i]['pu']);
+			$row[$j]['costo'] = cleanNumber($tabla[$i]['costo']);
+		}
+
+		if ( empty($row) ) {
+			throw new Exception("No se agrego ningún concepto a la cotización");
+		}
+
+			return $row;
+		}
+
+		function totalConceptosCotizacion($row)
+		{
+			$total = 0;
+
+			foreach ($row as $fila) {
+				$total += cleanNumber($fila['costo']);
+			}
+
+			return $total;
+		}
+
+	function insertarCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos)
+	{
+		$i = $con->prepare("INSERT INTO aio_cotizacion
+			(id_cotizacion, id_usuario_creo, para, asunto, email_envio, email_cliente, fecha, hora, nota, atencion, total, id_sucursal)
+			VALUES
+			(:id_cotizacion, :id_usuario_creo, :para, :asunto, :email_envio, :email_cliente, :fecha, :hora, :nota, :atencion, :total, :id_sucursal)
+		");
+		$i->execute(array(
+			':id_cotizacion' => $id_cotizacion,
+			':id_usuario_creo' => $user_logueado->id_usuario,
+			':para' => $datos['para'],
+			':asunto' => $datos['asunto'],
+			':email_envio' => $datos['email_envio'],
+			':email_cliente' => $datos['email_cliente'],
+			':fecha' => $datos['fecha'],
+			':hora' => $datos['hora'],
+			':nota' => $datos['nota'],
+			':atencion' => $datos['atencion'],
+			':total' => $datos['total'],
+			':id_sucursal' => $sucursal->id_sucursal,
+		));
+	}
+
+	function actualizarCotizacion($con, $id_cotizacion, $datos)
+	{
+		$u = $con->prepare("UPDATE aio_cotizacion
+			SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion, total=:total
+			WHERE id_cotizacion=:id_cotizacion
+		");
+		$u->execute(array(
+			':para' => $datos['para'],
+			':asunto' => $datos['asunto'],
+			':email_envio' => $datos['email_envio'],
+			':email_cliente' => $datos['email_cliente'],
+			':fecha' => $datos['fecha'],
+			':hora' => $datos['hora'],
+			':nota' => $datos['nota'],
+			':atencion' => $datos['atencion'],
+			':total' => $datos['total'],
+			':id_cotizacion' => $id_cotizacion,
+		));
+	}
+
+	function reemplazarConceptosCotizacion($con, $id_cotizacion, $row)
+	{
+		$d = $con->prepare("DELETE FROM aio_cotizacion_conceptos WHERE id_cotizacion=:id_cotizacion");
+		$d->execute(array(':id_cotizacion' => $id_cotizacion));
+
+		insertarConceptosCotizacion($con, $id_cotizacion, $row);
+	}
+
+	function insertarConceptosCotizacion($con, $id_cotizacion, $row)
+	{
+		$i = $con->prepare("INSERT INTO aio_cotizacion_conceptos
+			(id_cotizacion, descripcion, cantidad, unidad, pu, costo)
+			VALUES
+			(:id_cotizacion, :descripcion, :cantidad, :unidad, :pu, :costo)
+		");
+
+		foreach ($row as $fila) {
+			$i->execute(array(
+				':id_cotizacion' => $id_cotizacion,
+				':descripcion' => $fila['descripcion'],
+				':cantidad' => $fila['cantidad'],
+				':unidad' => $fila['unidad'],
+				':pu' => $fila['pu'],
+				':costo' => $fila['costo'],
+			));
+		}
+	}
+
+		function guardarCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row, $esNueva)
+		{
+			$datos['total'] = totalConceptosCotizacion($row);
+
+			if ($esNueva) {
+				insertarCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos);
+				insertarConceptosCotizacion($con, $id_cotizacion, $row);
+			return;
+		}
+
+		actualizarCotizacion($con, $id_cotizacion, $datos);
+		reemplazarConceptosCotizacion($con, $id_cotizacion, $row);
+	}
+
+	function generarPdfCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row)
+	{
+		$para = $datos['para'];
+		$atencion = $datos['atencion'];
+		$asunto_correo = $datos['asunto'];
+		$nota = $datos['nota'];
+
+		ob_start();
+		include(__DIR__ . '/cotizacionpdf.php');
+		$html = ob_get_clean();
+
+		$archivo = $id_cotizacion . '.pdf';
+		$html2pdf = new HTML2PDF('P', 'LETTER', 'es', array('mL', 'mT', 'mR', 'mB'));
+		$html2pdf->pdf->SetDisplayMode('fullpage');
+		$html2pdf->pdf->SetAuthor('Surtidores Martha');
+		$html2pdf->WriteHTML($html);
+		$html2pdf->setDefaultFont('helvetica');
+		$html2pdf->Output(__DIR__ . '/'. $archivo, 'F');
+
+		return $archivo;
+	}
+
+	function enviarCotizacion($archivo, $cliente_email, $mi_email, $asunto_correo, $cuerpo_correo)
+	{
+		$cc = explode(',', $cliente_email);
+		foreach ($cc as $em) {
+			$mail = new PHPMailer();
+			$mail->IsSMTP();
+			$mail->SMTPAuth = true;
+			$mail->Host = "s89419.gridserver.com";
+			$mail->Username = "contacto@surtidoresmartha.com";
+			$mail->Password = "SurtMa54321*/";
+			$mail->Port = 587;
+			$mail->setFrom($mi_email, "Cotizacion surtidoresmartha");
+			$mail->addAddress(trim($em));
+			$mail->Subject = $asunto_correo;
+			$mail->IsHTML(true);
+			$mail->Body = $cuerpo_correo;
+			$mail->AltBody = 'Adjunto cotizacion Cualquier duda o aclaracion quedo a sus ordenes Gracias y Saludos';
+			$mail->addAttachment($archivo, $archivo);
+			$mail->send();
+		}
+	}
+
+	function respuestaError($e)
+	{
+		return array(
+			'r' => 0,
+			'mensaje' => $e->getMessage()
+		);
+	}
 
 	//Conexion de BD
 	$con = conecta();
@@ -46,487 +244,112 @@
 		}
 	}
 
+	if ( !isset($hacer) ) {
+		$hacer = '';
+	}
+
+	if ( !isset($total_neto) ) {
+		$total_neto = 0;
+	}
+
 	switch ( $hacer ) {
 
 		case 'guardar_enviar':
 			try {
-				//ID de la cotizacion
 				$id_cotizacion = 'SIM-'.date('dms').'-'.date('Y');
-				//Fecha
-				$fecha = date('Y-m-d');
-				//Hora
-				$hora = date('H:i:s');
-				//Nota
-				$nota = base64_encode($_POST['nota']);
-                $total_neto = cleanNumber($total_neto);
+				$datos = datosCotizacion($total_neto);
+				$row = conceptosCotizacion();
 
-				$i = $con->prepare("INSERT INTO aio_cotizacion 
-					(id_cotizacion, id_usuario_creo, para, asunto, email_envio, email_cliente, fecha, hora, nota, atencion, total, id_sucursal)
-					VALUES 
-					(:id_cotizacion, :id_usuario_creo, :para, :asunto, :email_envio, :email_cliente, :fecha, :hora, :nota, :atencion, :total, :id_sucursal)
-				");
-				$i->bindParam(':id_cotizacion', $id_cotizacion);
-				$i->bindParam(':id_usuario_creo', $user_logueado->id_usuario);
-				$i->bindParam(':para', $para);
-				$i->bindParam(':asunto', $asunto_correo);
-				$i->bindParam(':email_envio', $mi_email);
-				$i->bindParam(':email_cliente', $cliente_email);
-				$i->bindParam(':fecha', $fecha);
-				$i->bindParam(':hora', $hora);
-				$i->bindParam(':nota', $nota);
-				$i->bindParam(':atencion',$atencion);
-				$i->bindParam(':total',$total_neto);
-				$i->bindParam(':id_sucursal', $sucursal->id_sucursal);
-				$i->execute();
-
-				//Toda la informacion de la tabla de cotizacion en JSON
-				$tabla = json_decode(stripslashes($_GET['action']),true);
-				if ( empty($tabla) || count($tabla) == 0 ) throw new Exception("No se agrego ningún concepto a la cotización");
-				//Variable para las filas
-				$row = array();
-				//Generar las filas y acomodar la informacion
-				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
-					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-					$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
-					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
-					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
-				};
-
-				foreach ($row as $fila) {
-					$i = $con->prepare("INSERT INTO aio_cotizacion_conceptos 
-						(id_cotizacion, descripcion, cantidad, unidad, pu, costo)
-						VALUES
-						(:id_cotizacion, :descripcion, :cantidad, :unidad, :pu, :costo)
-					");
-					$i->bindParam(':id_cotizacion', $id_cotizacion);
-					$i->bindParam(':descripcion', $fila['descripcion']);
-					$i->bindParam(':cantidad', $fila['cantidad']);
-					$i->bindParam(':unidad', $fila['unidad']);
-					$i->bindParam(':pu', $fila['pu']);
-					$i->bindParam(':costo',$fila['costo']);
-					$i->execute();
+				guardarCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row, true);
+				$archivo = generarPdfCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row);
+				enviarCotizacion($archivo, $datos['email_cliente'], $datos['email_envio'], $datos['asunto'], $cuerpo_correo);
+				if (file_exists($archivo)) {
+					unlink($archivo);
 				}
-
-				// get the HTML PDF
-				ob_start();
-				include('cotizacionpdf.php'); //Formato del PDF
-				$html = ob_get_clean();
-
-				//Libreria para genera el PDF				
-				require_once(__DIR__ . "/../../functions/html2pdf/html2pdf.class.php");
-				$archivo = $id_cotizacion.'.pdf'; //Nombre del archivo generado con la id de la cotizacion
-				$html2pdf = new HTML2PDF('P','LETTER','es',array('mL', 'mT', 'mR', 'mB'));
-				$html2pdf->pdf->SetDisplayMode('fullpage');
-				$html2pdf->pdf->SetAuthor('Surtidores Martha');
-				$html2pdf->WriteHTML($html);
-				$html2pdf->setDefaultFont('helvetica');	
-				$html2pdf->Output($archivo,'F'); //Se crea el pdf en el servidor
-
-				//Por que lo querian con copia
-				$cc = explode(',', $cliente_email);
-				//Archivos necesarios para el email
-				require_once(__DIR__ . "/../../functions/phpmailer/class.phpmailer.php");
-				//Ciclos de envio
-				foreach ($cc as $em) {
-					//Enviar cotizacion					
-					$mail = new PHPMailer(); //Generar el objeto de correo
-					// Set PHPMailer to use the sendmail transport
-					$mail->IsSMTP();
-					$mail->SMTPAuth = true;
-					$mail->Host = "s89419.gridserver.com"; // A RELLENAR. Aquí pondremos el SMTP a utilizar. Por ej. mail.midominio.com
-					$mail->Username = "contacto@surtidoresmartha.com"; // A RELLENAR. Email de la cuenta de correo. ej.info@midominio.com La cuenta de correo debe ser creada previamente. 
-					$mail->Password = "SurtMa54321*/"; // A RELLENAR. Aqui pondremos la contraseña de la cuenta de correo
-					$mail->Port = 587; // Puerto de conexión al servidor de envio. 
-					//Set who the message is to be sent from
-					$mail->setFrom($mi_email, "Cotizacion surtidoresmartha");
-					//Set who the message is to be sent to
-					$mail->addAddress( trim($em) );
-					//Set the subject line
-					$mail->Subject = $asunto_correo;
-					//Activar en el objeto el HTML
-					$mail->IsHTML(true);
-					//Cuerpo del mensaje
-					$mail->Body = $cuerpo_correo;
-					//Replace the plain text body with one created manually
-					$mail->AltBody = 'Adjunto cotizacion Cualquier duda o aclaracion quedo a sus ordenes Gracias y Saludos';
-					//Attach an image file
-					$mail->addAttachment($archivo,$archivo);
-					$mail->send();
-				}
-
-				unlink($archivo);
 
 				$data = array(
-					'r' 	  => 1,
+					'r' => 1,
 					'mensaje' => 'Se guardo y se envio la cotizacion',
 					'id_cotizacion' => $id_cotizacion
 				);
 			}catch (Exception $e){
-				$data = array(
-					'r' 	  => 0,
-					'mensaje' => $e->getMessage()
-				);
+				$data = respuestaError($e);
 			}
 		break;
 
 		case 'guardar':
 			try {
-				//ID de la cotizacion
 				$id_cotizacion = 'SIM-'.date('dms').'-'.date('Y');
-				//Fecha
-				$fecha = date('Y-m-d');
-				//Hora
-				$hora = date('H:i:s');
-				//Nota
-				$nota = base64_encode($_POST['nota']);
-                $total_neto = cleanNumber($total_neto);
+				$datos = datosCotizacion($total_neto);
+				$row = conceptosCotizacion();
 
-				$i = $con->prepare("INSERT INTO aio_cotizacion 
-					(id_cotizacion, id_usuario_creo, para, asunto, email_envio, email_cliente, fecha, hora, nota, atencion, total, id_sucursal)
-					VALUES 
-					(:id_cotizacion, :id_usuario_creo, :para, :asunto, :email_envio, :email_cliente, :fecha, :hora, :nota, :atencion, :total, :id_sucursal)
-				");
-				$i->bindParam(':id_cotizacion', $id_cotizacion);
-				$i->bindParam(':id_usuario_creo', $user_logueado->id_usuario);
-				$i->bindParam(':para', $para);
-				$i->bindParam(':asunto', $asunto_correo);
-				$i->bindParam(':email_envio', $mi_email);
-				$i->bindParam(':email_cliente', $cliente_email);
-				$i->bindParam(':fecha', $fecha);
-				$i->bindParam(':hora', $hora);
-				$i->bindParam(':nota', $nota);
-				$i->bindParam(':atencion', $atencion);
-				$i->bindParam(':total', $total_neto);
-				$i->bindParam(':id_sucursal', $sucursal->id_sucursal);
-				$i->execute();
-
-				//Toda la informacion de la tabla de cotizacion en JSON
-				$tabla = json_decode(stripslashes($_GET['action']),true);
-				if ( empty($tabla) || count($tabla) == 0 ) throw new Exception("No se agrego ningún concepto a la cotización");
-				//Variable para las filas
-				$row = array();
-				//Generar las filas y acomodar la informacion
-				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
-					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-					$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
-					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
-					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
-				};
-
-				foreach ($row as $fila) {
-					$i = $con->prepare("INSERT INTO aio_cotizacion_conceptos 
-						(id_cotizacion, descripcion, cantidad, unidad, pu, costo)
-						VALUES
-						(:id_cotizacion, :descripcion, :cantidad, :unidad, :pu, :costo)
-					");
-					$i->bindParam(':id_cotizacion', $id_cotizacion);
-					$i->bindParam(':descripcion', $fila['descripcion']);
-					$i->bindParam(':cantidad', $fila['cantidad']);
-					$i->bindParam(':unidad', $fila['unidad']);
-					$i->bindParam(':pu', $fila['pu']);
-					$i->bindParam(':costo',$fila['costo']);
-					$i->execute();
-				}
+				guardarCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row, true);
 
 				$data = array(
-					'r' 	  => 1,
+					'r' => 1,
 					'mensaje' => 'Se guardo la cotización',
 					'id_cotizacion' => $id_cotizacion
 				);
-
 			}catch (Exception $e){
-				$data = array(
-					'r' 	  => 0,
-					'mensaje' => $e->getMessage()
-				);
+				$data = respuestaError($e);
 			}
 		break;
 
 		case 'pdf_guardar':
-			//Nota
-			$nota = base64_encode($_POST['nota']);
-			//Fecha
-			$fecha = date('Y-m-d');
-			//Hora
-			$hora = date('H:i:s');
+			try {
+				$datos = datosCotizacion($total_neto);
+				$row = conceptosCotizacion();
 
-			//Actualizar la informacion general de la cotizacion
-			$u = $con->prepare("UPDATE aio_cotizacion 
-				SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion, total=:total
-				WHERE id_cotizacion=:id_cotizacion
-			");
-
-			$u->bindParam(':para', $para);
-			$u->bindParam(':asunto', $asunto_correo);
-			$u->bindParam(':email_envio', $mi_email);
-			$u->bindParam(':email_cliente', $cliente_email);
-			$u->bindParam(':fecha', $fecha);
-			$u->bindParam(':hora', $hora);
-			$u->bindParam(':nota', $nota);
-			$u->bindParam(':atencion', $atencion);
-			$u->bindParam(':id_cotizacion',$id_cotizacion);
-            $total_neto = cleanNumber($total_neto);
-            $u->bindParam(':total', $total_neto);
-			$u->execute();
-
-			//Borrar toda la informacion de la cotizacion para volverla a escribir
-			$d = $con->prepare("DELETE FROM aio_cotizacion_conceptos WHERE id_cotizacion=:id_cotizacion");
-			$d->bindParam(':id_cotizacion',$id_cotizacion);
-			$d->execute();
-
-			//Toda la informacion de la tabla de cotizacion en JSON
-			$tabla = json_decode(stripslashes($_GET['action']),true);
-			if ( empty($tabla) || count($tabla) == 0 ) throw new Exception("No se agrego ningún concepto a la cotización");
-			//Variable para las filas
-			$row = array();
-			//Generar las filas y acomodar la informacion
-			for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
-				$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-				$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-				$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
-				$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
-				$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
-			};
-
-			foreach ($row as $fila) {
-				$i = $con->prepare("INSERT INTO aio_cotizacion_conceptos 
-					(id_cotizacion, descripcion, cantidad, unidad, pu, costo)
-					VALUES
-					(:id_cotizacion, :descripcion, :cantidad, :unidad, :pu, :costo)
-				");
-				$i->bindParam(':id_cotizacion', $id_cotizacion);
-				$i->bindParam(':descripcion', $fila['descripcion']);
-				$i->bindParam(':cantidad', $fila['cantidad']);
-				$i->bindParam(':unidad', $fila['unidad']);
-                $fila_pu = cleanNumber($fila['pu']);
-                $i->bindParam(':pu', $fila_pu);
-                $fila_costo = cleanNumber($fila['costo']);
-                $i->bindParam(':costo', $fila_costo);
-				$i->execute();
-			}
-			// get the HTML
-			ob_start();
-			include('cotizacionpdf.php');
-			$html = ob_get_clean();
-			
-			require_once(__DIR__ . "/../../functions/html2pdf/html2pdf.class.php");
-
-			try{
-				$archivo = $id_cotizacion.'.pdf';
-				$html2pdf = new HTML2PDF('P','LETTER','es',array('mL', 'mT', 'mR', 'mB'));
-				$html2pdf->pdf->SetDisplayMode('fullpage');
-				$html2pdf->pdf->SetAuthor('Surtidores Martha');
-				$html2pdf->WriteHTML($html);
-				$html2pdf->setDefaultFont('helvetica');	
-				$html2pdf->Output($archivo,'F');
+				guardarCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row, false);
+				$archivo = generarPdfCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row);
 
 				$data = array(
-					'r' 	  => 1,
+					'r' => 1,
 					'mensaje' => 'Se genero el PDF de la Cotización',
 					'archivo' => $archivo
 				);
-			}catch(HTML2PDF_exception $e) {
-				$data = array(
-					'r' 	  => 0,
-					'mensaje' => $e->getMessage()
-				);
+			}catch (Exception $e){
+				$data = respuestaError($e);
 			}
 		break;
 
 		case 'editar_enviar':
 			try {
-				//Nota
-				$nota = base64_encode($_POST['nota']);
-				//Fecha
-				$fecha = date('Y-m-d');
-				//Hora
-				$hora = date('H:i:s');
-                $total_neto = cleanNumber($total_neto);
+				$datos = datosCotizacion($total_neto);
+				$row = conceptosCotizacion();
 
-				$u = $con->prepare("UPDATE aio_cotizacion 
-					SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion
-					WHERE id_cotizacion=:id_cotizacion
-				");
-				$u->bindParam(':para', $para);
-				$u->bindParam(':asunto', $asunto_correo);
-				$u->bindParam(':email_envio', $mi_email);
-				$u->bindParam(':email_cliente', $cliente_email);
-				$u->bindParam(':fecha', $fecha);
-				$u->bindParam(':hora', $hora);
-				$u->bindParam(':nota', $nota);
-				$u->bindParam(':atencion', $atencion);
-				$u->bindParam(':id_cotizacion',$id_cotizacion);
-				$u->execute();
-
-				$d = $con->prepare("DELETE FROM aio_cotizacion_conceptos WHERE id_cotizacion=:id_cotizacion");
-				$d->bindParam(':id_cotizacion',$id_cotizacion);
-				$d->execute();
-
-				//Toda la informacion de la tabla de cotizacion en JSON
-				$tabla = json_decode(stripslashes($_GET['action']),true);
-				if ( empty($tabla) || count($tabla) == 0 ) throw new Exception("No se agrego ningún concepto a la cotización");
-				//Variable para las filas
-				$row = array();
-				//Generar las filas y acomodar la informacion
-				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
-					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-					$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
-					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
-					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
-				};
-
-				foreach ($row as $fila) {
-					$i = $con->prepare("INSERT INTO aio_cotizacion_conceptos 
-						(id_cotizacion, descripcion, cantidad, unidad, pu, costo)
-						VALUES
-						(:id_cotizacion, :descripcion, :cantidad, :unidad, :pu, :costo)
-					");
-					$i->bindParam(':id_cotizacion', $id_cotizacion);
-					$i->bindParam(':descripcion', $fila['descripcion']);
-					$i->bindParam(':cantidad', $fila['cantidad']);
-					$i->bindParam(':unidad', $fila['unidad']);
-					$i->bindParam(':pu', $fila['pu']);
-					$i->bindParam(':costo',$fila['costo']);
-					$i->execute();
+				guardarCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row, false);
+				$archivo = generarPdfCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row);
+				enviarCotizacion($archivo, $datos['email_cliente'], $datos['email_envio'], $datos['asunto'], $cuerpo_correo);
+				if (file_exists($archivo)) {
+					unlink($archivo);
 				}
-
-
-				// get the HTML PDF
-				ob_start();
-				include('cotizacionpdf.php'); //Formato del PDF
-				$html = ob_get_clean();
-
-				//Libreria para genera el PDF				
-				require_once(__DIR__ . "/../../functions/html2pdf/html2pdf.class.php");
-				$archivo = $id_cotizacion.'.pdf'; //Nombre del archivo generado con la id de la cotizacion
-				$html2pdf = new HTML2PDF('P','LETTER','es',array('mL', 'mT', 'mR', 'mB'));
-				$html2pdf->pdf->SetDisplayMode('fullpage');
-				$html2pdf->pdf->SetAuthor('Surtidores Martha');
-				$html2pdf->WriteHTML($html);
-				$html2pdf->setDefaultFont('helvetica');	
-				$html2pdf->Output($archivo,'F'); //Se crea el pdf en el servidor
-
-				//Por que lo querian con copia
-				$cc = explode(',', $cliente_email);
-				//Archivos necesarios para el email
-				require_once(__DIR__ . "/../../functions/phpmailer/class.phpmailer.php");
-				//Ciclos de envio
-				foreach ($cc as $em) {
-					//Enviar cotizacion					
-					$mail = new PHPMailer(); //Generar el objeto de correo
-					// Set PHPMailer to use the sendmail transport
-					$mail->IsSMTP();
-					$mail->SMTPAuth = true;
-					$mail->Host = "s89419.gridserver.com"; // A RELLENAR. Aquí pondremos el SMTP a utilizar. Por ej. mail.midominio.com
-					$mail->Username = "contacto@surtidoresmartha.com"; // A RELLENAR. Email de la cuenta de correo. ej.info@midominio.com La cuenta de correo debe ser creada previamente. 
-					$mail->Password = "SurtMa54321*/"; // A RELLENAR. Aqui pondremos la contraseña de la cuenta de correo
-					$mail->Port = 587; // Puerto de conexión al servidor de envio. 
-					//Set who the message is to be sent from
-					$mail->setFrom($mi_email, "Cotizacion surtidoresmartha");
-					//Set who the message is to be sent to
-					$mail->addAddress( trim($em) );
-					//Set the subject line
-					$mail->Subject = $asunto_correo;
-					//Activar en el objeto el HTML
-					$mail->IsHTML(true);
-					//Cuerpo del mensaje
-					$mail->Body = $cuerpo_correo;
-					//Replace the plain text body with one created manually
-					$mail->AltBody = 'Adjunto cotizacion Cualquier duda o aclaracion quedo a sus ordenes Gracias y Saludos';
-					//Attach an image file
-					$mail->addAttachment($archivo,$archivo);
-					$mail->send();
-				}
-
-				unlink($archivo);
 
 				$data = array(
-					'r' 	  => 1,
-					'mensaje' => 'Se guardo y se envio la cotizacion'.$content_PDF,
+					'r' => 1,
+					'mensaje' => 'Se guardo y se envio la cotizacion',
 					'id_cotizacion' => $id_cotizacion
 				);
-
 			}catch (Exception $e){
-				$data = array(
-					'r' 	  => 0,
-					'mensaje' => $e->getMessage()
-				);
-			}		
+				$data = respuestaError($e);
+			}
 		break;
 
 		case 'editar':
 			try {
-				//Nota
-				$nota = base64_encode($_POST['nota']);
-				//Fecha
-				$fecha = date('Y-m-d');
-				//Hora
-				$hora = date('H:i:s');
-                $total_neto = cleanNumber($total_neto);
+				$datos = datosCotizacion($total_neto);
+				$row = conceptosCotizacion();
 
-				$u = $con->prepare("UPDATE aio_cotizacion 
-					SET para=:para, asunto=:asunto, email_envio=:email_envio, email_cliente=:email_cliente, fecha=:fecha, hora=:hora, nota=:nota, atencion=:atencion
-					WHERE id_cotizacion=:id_cotizacion
-				");
-				$u->bindParam(':para', $para);
-				$u->bindParam(':asunto', $asunto_correo);
-				$u->bindParam(':email_envio', $mi_email);
-				$u->bindParam(':email_cliente', $cliente_email);
-				$u->bindParam(':fecha', $fecha);
-				$u->bindParam(':hora', $hora);
-				$u->bindParam(':nota', $nota);
-				$u->bindParam(':atencion', $atencion);
-				$u->bindParam(':id_cotizacion',$id_cotizacion);
-				$u->execute();
-
-				$d = $con->prepare("DELETE FROM aio_cotizacion_conceptos WHERE id_cotizacion=:id_cotizacion");
-				$d->bindParam(':id_cotizacion',$id_cotizacion);
-				$d->execute();
-
-				//Toda la informacion de la tabla de cotizacion en JSON
-				$tabla = json_decode(stripslashes($_GET['action']),true);
-				if ( empty($tabla) || count($tabla) == 0 ) throw new Exception("No se agrego ningún concepto a la cotización");
-				//Variable para las filas
-				$row = array();
-				//Generar las filas y acomodar la informacion
-				for ($i=1, $j=0; $i < count($tabla)-1 ; $i++, $j++) {
-					$row[$j]['descripcion'] = $tabla[$i]['descripcion'];
-					$row[$j]['cantidad'] 	= cleanNumber($tabla[$i]['cantidad']);
-					$row[$j]['unidad'] 		= $tabla[$i]['unidad'];
-					$row[$j]['pu']			= cleanNumber($tabla[$i]['pu']);
-					$row[$j]['costo'] 		= cleanNumber($tabla[$i]['costo']);
-				};
-
-				foreach ($row as $fila) {
-					$i = $con->prepare("INSERT INTO aio_cotizacion_conceptos 
-						(id_cotizacion, descripcion, cantidad, unidad, pu, costo)
-						VALUES
-						(:id_cotizacion, :descripcion, :cantidad, :unidad, :pu, :costo)
-					");
-					$i->bindParam(':id_cotizacion', $id_cotizacion);
-					$i->bindParam(':descripcion', $fila['descripcion']);
-					$i->bindParam(':cantidad', $fila['cantidad']);
-					$i->bindParam(':unidad', $fila['unidad']);
-					$i->bindParam(':pu', $fila['pu']);
-					$i->bindParam(':costo',$fila['costo']);
-					$i->execute();
-				}
+				guardarCotizacion($con, $id_cotizacion, $user_logueado, $sucursal, $datos, $row, false);
 
 				$data = array(
-					'r' 	  => 1,
+					'r' => 1,
 					'mensaje' => 'Se guardo la cotizacion',
 					'id_cotizacion' => $id_cotizacion
 				);
-
 			}catch (Exception $e){
-				$data = array(
-					'r' 	  => 0,
-					'mensaje' => $e->getMessage()
-				);
-			}		
+				$data = respuestaError($e);
+			}
 		break;
 
 		case 'borrar':
@@ -541,20 +364,17 @@
 				$d->execute();
 
 				$data = array(
-					'r' 	  => 1,
+					'r' => 1,
 					'mensaje' => 'Se elimino la cotizacion'
 				);
 			}catch (Exception $e){
-				$data = array(
-					'r' 	  => 0,
-					'mensaje' => $e->getMessage()
-				);
-			}	
+				$data = respuestaError($e);
+			}
 		break;
 
 		default:
 			$data = array(
-				'r' 	  => 0,
+				'r' => 0,
 				'mensaje' => 'No juegues conmigo'
 			);
 		break;

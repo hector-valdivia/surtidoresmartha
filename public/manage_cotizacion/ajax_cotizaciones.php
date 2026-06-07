@@ -31,7 +31,6 @@ $columns = array(
         'db' => 'id_usuario_creo',     
         'dt' => 4,
         'formatter' => function( $id_usuario, $row ) {
-            //Conexion de BD
             $con = conecta();
             $b = $con->prepare("SELECT CONCAT(nombre, ' ', apellido) as nombre_completo FROM aio_personal WHERE id_usuario=:id LIMIT 1");
             $b->bindParam(':id', $id_usuario);
@@ -41,11 +40,11 @@ $columns = array(
         }
     ),
     array(
-        'db'        => 'id_cotizacion',
+        'db'        => 'id',
         'dt'        => 5,
-        'formatter' => function( $id_cotizacion, $row ) {
-            $html = '<a href="agregar.php?id='.encriptar($id_cotizacion).'" class="edit tip" title="Editar">Editar</a>';
-			$html.= '<a href="#"  data-id="'.encriptar($id_cotizacion).'" class="borrar delete tip" title="Borrar">Borrar</a>';
+        'formatter' => function( $id, $row ) {
+            $html = '<a href="agregar.php?id='.encriptar($id).'" class="edit tip" title="Editar">Editar'.$id.'</a>';
+			$html.= '<a href="#"  data-id="'.encriptar($id).'" class="borrar delete tip" title="Borrar">Borrar</a>';
             return $html;
         }
     )

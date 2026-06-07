@@ -7,28 +7,30 @@
 	$con = conecta();
 	$user_logueado = info_personal( desencriptar( limpiar($_SESSION['id']) ) );
 
-	if ( isset( $_GET['id'] ) ){
+    $id = '';
+	if (isset($_GET['id'] )){
 		$id = desencriptar($_GET['id']);
-
-		$c = $con->prepare("SELECT COUNT(id_cotizacion) FROM aio_cotizacion WHERE id_cotizacion=:id");
+		$c = $con->prepare("SELECT COUNT(id) FROM aio_cotizacion WHERE id=:id");
 		$c->bindParam(':id',$id);
 		$c->execute();
-		if ( $c->fetchColumn() == 0 ) header('Location:table.php');
-		else{
-			$b = $con->prepare("SELECT * FROM aio_cotizacion WHERE id_cotizacion=:id");
-			$b->bindParam(':id',$id);
-			$b->execute();
 
-			$cot = $b->fetchObject();
-		}
-	}else $id = '';
+		if ( $c->fetchColumn() == 0 ){
+            header('Location:table.php');
+        }
+
+        $b = $con->prepare("SELECT * FROM aio_cotizacion WHERE id=:id");
+        $b->bindParam(':id',$id);
+        $b->execute();
+
+        $cot = $b->fetchObject();
+    }
 ?>
 
 <!DOCTYPE HTML>
 <html lang="es">
 <head>
 	<?php include(__DIR__ . "/../../modules/header.php"); ?>
-	<title>Cotización <?php echo $id; ?></title>
+	<title>Cotización <?php echo !empty($id) ? $cot->id_cotizacion : 'Nueva'; ?></title>
 </head>
 <body>
 
@@ -43,7 +45,7 @@
 		<div class="col-lg-12">
 			<!-- Box Header: Start -->
 			<div class="box_top">
-				<h2 class="icon pages">Cotización <?php echo $id; ?></h2>
+				<h2 class="icon pages">Cotización <?php echo $cot->id_cotizacion ?? ''; ?></h2>
 				<ul class="sorting">
 					<li><a class="btn" data-toggle="modal" data-target="#modal_agregar">+ Agregar</a></li>
 				</ul>
@@ -68,8 +70,8 @@
 						<tbody id="tabla_cotizacion_body" class="content">
 							<?php if ( !empty($id) ): ?>
 								<?php
-									$b = $con->prepare("SELECT * FROM aio_cotizacion_conceptos WHERE id_cotizacion=:id");
-									$b->bindParam(':id',$id);
+									$b = $con->prepare("SELECT * FROM aio_cotizacion_conceptos WHERE id_cotizacion=:id_cotizacion");
+									$b->bindParam(':id_cotizacion',$cot->id_cotizacion);
 									$b->execute();
 									while( $r = $b->fetchObject() ):
 								?>
@@ -190,9 +192,9 @@
 							<button type="submit" class="btn btn-lg btn-primary enviar" id="guardar_enviar" data-hacer="guardar_enviar">Enviar PDF</button>
 						<?php endif; ?>
 					</div>
-					<input type="hidden" name="total_neto" id="total_neto" value="<?php if ( !empty($id) ) echo dinero($cot->total); else echo 0; ?>">
+					<input type="hidden" name="total_neto" id="total_neto" value="<?php if ( !empty($id) ) echo cleanNumber($cot->total); else echo 0; ?>">
 					<input type="hidden" name="hacer" id="hacer" value="nada">
-					<input type="hidden" name="id_cotizacion" id="id_cotizacion" value="<?php if ( !empty($id) ) echo $id; ?>">
+					<input type="hidden" name="id_cotizacion" id="id_cotizacion" value="<?php if ( !empty($id) ) echo $cot->id_cotizacion; ?>">
 				</div>
 			</div>
 		</div>
@@ -206,24 +208,64 @@
 
 <!--==================== Le jquery ====================-->
 <?php include(__DIR__ . "/../../modules/js.php"); ?>
-<script type="text/javascript" src="<?php echo _BASE_URL; ?>/assets/js/gritter/jquery.gritter.js"></script>
-<script src="<?php echo _BASE_URL; ?>/assets/js/customrequiest.js"></script>
-<script src="<?php echo _BASE_URL; ?>/assets/js/jquery.confirm.min.js"></script>
-<script src="<?php echo _BASE_URL; ?>/assets/js/jquery.tabletojson.js"></script>
+<script type="text/javascript" src="/assets/js/gritter/jquery.gritter.js"></script>
+<script src="/assets/js/customrequiest.js"></script>
+<script src="/assets/js/jquery.confirm.min.js"></script>
+<script src="/assets/js/jquery.tabletojson.js"></script>
 
 <script type="text/javascript">
 	$(document).ready(function() {
 		/*===========================================================*/
 		/*	Function mensaje de exito
 		/*===========================================================*/
-		function mensaje(data){
-			$.gritter.add({
-				title: 'Exito',
-				text: data.mensaje,
-				class_name: 'success',
-				time: 80000
-			});
-		}
+			function mensaje(data){
+				$.gritter.add({
+					title: 'Exito',
+					text: data.mensaje,
+					class_name: 'success',
+					time: 80000
+				});
+			}
+
+			function limpiarImporte(valor) {
+				if (valor === undefined || valor === null || valor === '') return 0;
+				valor = String(valor).replace(/\$/g, '').replace(/\s/g, '');
+
+				if (valor.indexOf(',') !== -1 && valor.indexOf('.') !== -1) {
+					if (valor.lastIndexOf(',') > valor.lastIndexOf('.')) {
+						valor = valor.replace(/\./g, '').replace(',', '.');
+					} else {
+						valor = valor.replace(/,/g, '');
+					}
+				} else if (valor.indexOf(',') !== -1) {
+					valor = /^-?\d{1,3},\d{3}$/.test(valor) ? valor.replace(/,/g, '') : valor.replace(',', '.');
+				}
+
+				valor = parseFloat(valor);
+				return isNaN(valor) ? 0 : valor;
+			}
+
+			function importeFila(row) {
+				return limpiarImporte(row.find('td').eq(5).text());
+			}
+
+			function mostrarTotal(total) {
+				total = limpiarImporte(total);
+				if (total < 0 && Math.abs(total) < 0.01) total = 0;
+				$('#total_neto').val(total.toFixed(2));
+				$('#div_total_neto').html('$'+total.toFixed(2));
+			}
+
+			function recalcularTotalNeto() {
+				let total = 0;
+
+				$('#tabla_cotizacion_body tr').not('#cero').each(function() {
+					total += importeFila($(this));
+				});
+
+				mostrarTotal(total);
+				return total;
+			}
 
 		/*===========================================================*/
 		/*	Function para hacer
@@ -240,11 +282,13 @@
 			promptPosition : "bottomLeft", 
 			autoPositionUpdate : true,
 			onValidationComplete: function(form, status){
-				if ( status == true ){
-					if ( $('#cero').length == false ) {
-						//Serializar la informacion del form
-						var form  = $('#enviar_cotizacion').serialize();
-						var table = $('#tabla_cotizacion').tableToJSON({
+					if ( status == true ){
+						if ( $('#cero').length == false ) {
+							recalcularTotalNeto();
+
+							//Serializar la informacion del form
+							let form  = $('#enviar_cotizacion').serialize();
+							let table = $('#tabla_cotizacion').tableToJSON({
 							ignoreColumns: [0],
 							headings: ['descripcion','cantidad','unidad','pu','costo']
 						});
@@ -280,46 +324,40 @@
 			autoPositionUpdate : true,
 			onValidationComplete: function(form, status){
 				if ( status == true ){
-					//Serializar la informacion del form
-					var datos_form = $("#modal_form_agregar").serializeArray();					
-					var hacer 	   = $('#modal_form_agregar #hacer').val();
-					var total_neto = 0;
-					var costo 	   = parseFloat( datos_form[1].value ) * parseFloat( datos_form[3].value );
+						//Serializar la informacion del form
+						let datos_form = $("#modal_form_agregar").serializeArray();
+						let hacer 	   = $('#modal_form_agregar #hacer').val();
+						let cantidad   = limpiarImporte(datos_form[1].value);
+						let precio     = limpiarImporte(datos_form[3].value);
+						let costo 	   = cantidad * precio;
 
 					//Agregar a la pagina
 					if ( $('#cero').length ) $('#cero').remove(); //Comprobar si se quito row dommie
 
+						let row = $('#tabla_cotizacion_body tr:last');
 					switch ( hacer ){
-						case 'agregar':
-							$('#tabla_cotizacion_body').append('<tr></tr>');
-							var row = $('#tabla_cotizacion_body tr:last');
-							total_neto = parseFloat( $('#total_neto').val() );
-						break;
+                        case 'agregar':
+                            $('#tabla_cotizacion_body').append('<tr></tr>');
+                            row = $('#tabla_cotizacion_body tr:last');
+                        break;
 
-						case 'editar':
-							var row = $('#tabla_cotizacion_body').find('.editando');
-							//Total de la fila
-							var restar_fila = row.find('td:eq(5)').text().replace('$', '');
-							//Quitar total anterior
-							total_neto = parseFloat( $('#total_neto').val() ) - parseFloat( restar_fila );
-							//Limpiar de columnas
-							row.children().remove();
-						break;
-					}
+                        case 'editar':
+                            row = $('#tabla_cotizacion_body').find('.editando');
+                            row.children().remove();
+                        break;
+                    }
 
-					row.append('<td class="center" style="width: 15%;"><div class="btn-group"><button type="button" class="borrar btn btn-default"><span class="glyphicon glyphicon-remove-sign"></span></button><button type="button" class="editar btn btn-default"><span class="glyphicon glyphicon-edit"></span></button></div></td>');
-					row.append('<td class="center">'+datos_form[0].value+'</td>');
-					row.append('<td class="center">'+datos_form[1].value+'</td>');
-					row.append('<td class="center">'+datos_form[2].value+'</td>');
-					row.append('<td class="center">$'+parseFloat(datos_form[3].value).toFixed(2)+'</td>');
-					row.append('<td class="center">$'+costo.toFixed(2)+'</td>');
-					row.removeClass('editando');
+                    row.append('<td class="center" style="width: 15%;"><div class="btn-group"><button type="button" class="borrar btn btn-default"><span class="glyphicon glyphicon-remove-sign"></span></button><button type="button" class="editar btn btn-default"><span class="glyphicon glyphicon-edit"></span></button></div></td>');
+                    row.append('<td class="center">'+datos_form[0].value+'</td>');
+                    row.append('<td class="center">'+datos_form[1].value+'</td>');
+                    row.append('<td class="center">'+datos_form[2].value+'</td>');
+                    row.append('<td class="center">$'+precio.toFixed(2)+'</td>');
+                    row.append('<td class="center">$'+costo.toFixed(2)+'</td>');
+                    row.removeClass('editando');
 
-					//Agregar a la tabla
-					total_neto = total_neto + costo;
-					$('#div_total_neto').html('$'+total_neto.toFixed(2));
-					$('#total_neto').val( total_neto.toFixed(2) );
-					$('#modal_agregar').modal('hide');
+                    //Recalcular total neto con todas las filas actuales
+                    recalcularTotalNeto();
+                    $('#modal_agregar').modal('hide');
 				}//if ( status == true )
 
 			}//onValidationComplete: function(form, status)		
@@ -328,22 +366,19 @@
 		////////////////////////////////////////////////////////////////////
 		//Borrar de la cotizacion
 		$('#tabla_cotizacion_body').on('click', '.borrar', function(event) {
-			event.preventDefault();
-			var row = $(this).closest('tr');
-			$.confirm({
-				text: "Esta seguro que quiere quitar este elemento de la cotización",
-				title: "Confirmar",
-				confirm: function(button) {
-					total_neto = parseFloat( $('#total_neto').val() ) - parseFloat( row.children('td:eq(5)').text().replace('$', '') );
+				event.preventDefault();
+				let row = $(this).closest('tr');
+					$.confirm({
+						text: "Esta seguro que quiere quitar este elemento de la cotización",
+						title: "Confirmar",
+						confirm: function(button) {
+							row.remove();
+							if($('#tabla_cotizacion_body > tr').length == 0){
+	                            $('#tabla_cotizacion_body').append('<tr id="cero"><td colspan="6" class="center">No se ah agregado nada a la cotización</td></tr>');
+	                        }
 
-					//Agregar a la tabla
-					$('#total_neto').val(total_neto.toFixed(2));
-					$('#div_total_neto').html('$'+total_neto.toFixed(2));
-
-					row.remove();
-					if( $('#tabla_cotizacion_body > tr').length == 0 ) 
-						$('#tabla_cotizacion_body').append('<tr id="cero"><td colspan="6">No se ah agregado nada a la cotización</td></tr>');			
-				},
+							recalcularTotalNeto();
+						},
 				cancel: function(button) {},
 				confirmButton: "Borrar",
 				cancelButton: "Cancelar",
@@ -355,16 +390,15 @@
 		//Editar de la cotizacion
 		$('#tabla_cotizacion_body').on('click', '.editar', function(event) {
 			event.preventDefault();
-			var row = $(this).closest('tr');
-			//Variable para las columnas
-			var cell = Array();
-			//Generar variables de las columnas
+			let row = $(this).closest('tr');
+			let cell = [];
+
 			$(row).find("td").each(function(i,v) {
 				cell[i] = $(this).text();
 				switch(i){
-					case 4:
-						cell[i] = parseFloat( cell[i].replace('$', '').replace(',', '') );
-					break;
+                    case 4:
+                        cell[i] = limpiarImporte(cell[i]);
+                    break;
 				}
 			});
 
@@ -386,7 +420,8 @@
 			$('#modal_agregar #titleAgregar').html('Agregar a la cotización');
 			$('#modal_form_agregar #hacer').val('agregar');
 			$('#modal_form_agregar').validationEngine('hideAll');
-			var row = $('#tabla_cotizacion_body').find('.editando');
+
+			let row = $('#tabla_cotizacion_body').find('.editando');
 			row.removeClass('editando');
 		});
 	});
