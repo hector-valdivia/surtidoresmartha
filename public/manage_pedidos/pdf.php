@@ -2,6 +2,9 @@
 
 date_default_timezone_set('America/Chihuahua');
 session_start();
+
+use Spipu\Html2Pdf\Html2Pdf;
+require(__DIR__ . "/../../vendor/autoload.php");
 include(__DIR__ . "/../../funciones.php");
 
 registrado();
@@ -34,8 +37,8 @@ if ( empty($id) ){
 }
 
 //id es igual al folio de la orden
-$b = $con->prepare("SELECT * FROM aio_orden WHERE folio=:folio");
-$b->bindParam(':folio',$id);
+$b = $con->prepare("SELECT * FROM aio_orden WHERE id=:id");
+$b->bindParam(':id',$id);
 $b->execute();
 $orden = $b->fetchObject();
 
@@ -208,8 +211,17 @@ $html = '
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Seleccionamos la informacion de la tabla de personal de la orden, agrupandolos para asi sumar los dias trabajados para genera una lista
-$b = $con->prepare("SELECT id_personal,categoria,dia,SUM(costo) AS costo,SUM(horas) AS horas FROM aio_orden_personal WHERE folio=:folio GROUP BY id_personal,categoria,dia ORDER BY id_personal,dia");
-$b->bindParam(':folio', $orden->folio);
+$b = $con->prepare("SELECT 
+    id_personal,
+    categoria,
+    dia,
+    SUM(costo) AS costo,
+    SUM(horas) AS horas 
+    FROM aio_orden_personal 
+    WHERE orden_id=:orden_id 
+    GROUP BY id_personal,categoria,dia 
+    ORDER BY id_personal,dia");
+$b->bindParam(':orden_id', $orden->id);
 $b->execute();
 
 //Inicializar variables
@@ -257,8 +269,8 @@ if ( $i < 10 ) {
 ///////// Tabla de material usado
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-$b = $con->prepare("SELECT * FROM aio_orden_material WHERE folio=:folio");
-$b->bindParam(':folio', $orden->folio);
+$b = $con->prepare("SELECT * FROM aio_orden_material WHERE orden_id=:orden_id");
+$b->bindParam(':orden_id', $orden->id);
 $b->execute();
 
 $i=0;
@@ -293,8 +305,8 @@ if ( $i < 10 ) {
 ///////// Tabla de herramientas usadas
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-$b = $con->prepare("SELECT * FROM aio_orden_herramienta WHERE folio=:folio");
-$b->bindParam(':folio', $orden->folio);
+$b = $con->prepare("SELECT * FROM aio_orden_herramienta WHERE orden_id=:orden_id");
+$b->bindParam(':orden_id', $orden->id);
 $b->execute();
 
 $i=0;
@@ -397,16 +409,14 @@ $html.= '
 
 //echo $html;
 
-require_once(__DIR__ . "/../../functions/html2pdf/html2pdf.class.php");
-
 try{
 	$html2pdf = new HTML2PDF('P','LETTER','es',array('mL', 'mT', 'mR', 'mB'));
 	$html2pdf->pdf->SetDisplayMode('fullpage');
 	$html2pdf->WriteHTML($html);
 	$html2pdf->setDefaultFont('helvetica');	
 	$html2pdf->Output($id.'.pdf');
-}catch(HTML2PDF_exception $e) {
+}catch(Exception $e) {
 	//Falla generada por la creacion del pdf
-	$_SESSION['error'] = $e;
+	$_SESSION['error'] = $e->getMessage();
 	header('location:table.php');
 }

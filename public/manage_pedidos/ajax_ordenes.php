@@ -37,9 +37,9 @@ $columns = array(
         return substr($fecha, 0,10);
     }),
 
-    array( 'db' => 'folio', 'dt' => 6, 'formatter' => function( $folio, $row ) {
-            $html = '<a href="pdf.php?id='.encriptar($folio).'"  target="_blank" class="view tip" title="Ver PDF">Ver PDF</a>';
-            $html.= '<a href="info.php?id='.encriptar($folio).'" class="edit tip" title="Editar">Editar</a>';
+    array( 'db' => 'id', 'dt' => 6, 'formatter' => function( $orden_id, $row ) {
+            $html = '<a href="pdf.php?id='.encriptar($orden_id).'"  target="_blank" class="view tip" title="Ver PDF">Ver PDF</a>';
+            $html.= '<a href="info.php?id='.encriptar($orden_id).'" class="edit tip" title="Editar">Editar</a>';
             return $html;
         }
     )

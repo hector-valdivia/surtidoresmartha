@@ -119,4 +119,3 @@ switch ($hacer) {
 header("location:$direccion");
 
 $con = null;
-?>

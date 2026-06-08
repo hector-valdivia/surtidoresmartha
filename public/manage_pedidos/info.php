@@ -6,14 +6,14 @@
 	//Conexion de BD
 	$con = conecta();
 
-	$info = limpiar( desencriptar($_GET['id']) ); 
+	$id = limpiar( desencriptar($_GET['id']) );
 
-	if ( empty($info) ) {
+	if ( empty($id) ) {
 		header("location: table.php");
 	}
 
-	$b = $con->prepare("SELECT * FROM aio_orden WHERE folio=:id");
-	$b->bindParam(':id',$info);
+	$b = $con->prepare("SELECT * FROM aio_orden WHERE id=:id");
+	$b->bindParam(':id',$id);
 	$b->execute();
 	$ped = $b->fetchObject();
 
@@ -25,7 +25,7 @@
 <html lang="es">
 <head>
 	<?php include(__DIR__ . "/../../modules/header.php"); ?>	
-	<title>Pedido <?php echo $info; ?></title>
+	<title>Pedido <?php echo $ped->folio; ?></title>
 	<script src="<?php echo _BASE_URL; ?>/assets/js/chained.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
@@ -126,8 +126,8 @@
 			<!-- Box Header: Start -->
 			<div class="box_top">
 				<?php 
-				    $c = $con->prepare("SELECT COUNT(id) FROM aio_orden_personal WHERE folio=:folio");
-				    $c->bindParam(':folio',$ped->folio);
+				    $c = $con->prepare("SELECT COUNT(id) FROM aio_orden_personal WHERE orden_id=:orden_id");
+				    $c->bindParam(':orden_id',$ped->id);
 				    $c->execute();
 				    $numero = $c->fetchColumn();
 				?>
@@ -156,8 +156,8 @@
 								$total_costo = 0;
 
 								//Busqueda del personal
-								$b = $con->prepare("SELECT * FROM aio_orden_personal WHERE folio=:folio");
-								$b->bindParam(':folio', $ped->folio);
+								$b = $con->prepare("SELECT * FROM aio_orden_personal WHERE orden_id=:orden_id");
+								$b->bindParam(':orden_id', $ped->id);
 								$b->execute();
 							?>
 							<?php while ( $r = $b->fetchObject() ): ?>
@@ -229,8 +229,8 @@
 					</div>
 
 					<div class="field">
-						<input type="text" name="folio" id="folio" value="<?php echo $ped->folio; ?>" readonly="true" class="form-control small validate[required] text-input" style="display:none;" />
-						<input type="text" name="hacer" id="hacer" value="trabajador" readonly="true" class="form-control small validate[required] text-input" style="display:none;" />
+						<input type="hidden" name="orden_id" id="orden_id" value="<?php echo $ped->id; ?>" readonly="readonly" class="form-control small validate[required] text-input" style="display:none;" />
+						<input type="hidden" name="hacer" id="hacer" value="trabajador" readonly="readonly" class="form-control small validate[required] text-input" style="display:none;" />
 						<button class="btn btn-success">Guardar</button>
 					</div>
 				</form>
@@ -241,8 +241,8 @@
 			<!-- Box Header: Start -->
 			<div class="box_top">
 				<?php
-				    $c = $con->prepare("SELECT COUNT(id) FROM aio_orden_material WHERE folio=:folio");
-				    $c->bindParam(':folio',$ped->folio);
+				    $c = $con->prepare("SELECT COUNT(id) FROM aio_orden_material WHERE orden_id=:orden_id");
+				    $c->bindParam(':orden_id',$ped->id);
 				    $c->execute();
 				    $numero = $c->fetchColumn();
 				?>
@@ -265,11 +265,11 @@
 						<tbody class="content">
 							<?php
 								//Inicializar total de material
-								$total_material = '';
+								$total_material = 0;
 
 								//Busqueda del material usado
-								$b = $con->prepare("SELECT * FROM aio_orden_material WHERE folio=:folio");
-								$b->bindParam(':folio', $ped->folio);
+								$b = $con->prepare("SELECT * FROM aio_orden_material WHERE orden_id=:orden_id");
+								$b->bindParam(':orden_id', $ped->id);
 								$b->execute();
 							?>
 							<?php while ( $r = $b->fetchObject() ): ?>
@@ -318,8 +318,8 @@
 						<input type="text" name="costo" id="costo" class="form-control validate[required]" placeholder="$" />
 					</div>
 					<div class="field">
-						<input type="text" name="folio" id="folio" value="<?php echo $ped->folio; ?>" readonly="true" class="small form-control validate[required] text-input" style="display:none;" />
-						<input type="text" name="hacer" id="hacer" value="material" readonly="true" class="small form-control validate[required] text-input" style="display:none;" />
+						<input type="hidden" name="orden_id" value="<?php echo $ped->id; ?>" readonly="readonly" class="validate[required]" style="display:none;" />
+						<input type="hidden" name="hacer" value="material" readonly="readonly" class="validate[required]" style="display:none;" />
 						<button class="btn btn-success">Guardar</button>
 					</div>
 				</form>
@@ -330,8 +330,8 @@
 			<!-- Box Header: Start -->
 			<div class="box_top">
 				<?php 
-				    $c = $con->prepare("SELECT COUNT(id) FROM aio_orden_material WHERE folio=:folio");
-				    $c->bindParam(':folio',$ped->folio);
+				    $c = $con->prepare("SELECT COUNT(id) FROM aio_orden_material WHERE orden_id=:orden_id");
+				    $c->bindParam(':orden_id',$ped->id);
 				    $c->execute();
 				    $numero = $c->fetchColumn();
 				?>
@@ -352,8 +352,8 @@
 						</thead>
 						<tbody class="content">
 							<?php							
-								$b = $con->prepare("SELECT * FROM aio_orden_herramienta WHERE folio=:folio");
-								$b->bindParam(':folio', $ped->folio);
+								$b = $con->prepare("SELECT * FROM aio_orden_herramienta WHERE orden_id=:orden_id");
+								$b->bindParam(':orden_id', $ped->id);
 								$b->execute();
 							?>
 							<?php while ( $r = $b->fetchObject() ): ?>
@@ -385,8 +385,8 @@
 						<input type="text" name="cantidad" id="cantidad" class="form-control validate[required]" />
 					</div>
 					<div class="field">
-						<input type="text" name="folio" id="folio" value="<?php echo $ped->folio; ?>" readonly="true" class="small validate[required] text-input" style="display:none;" />
-						<input type="text" name="hacer" id="hacer" value="herramienta" readonly="true" class="small validate[required] text-input" style="display:none;" />
+						<input type="hidden" name="orden_id" value="<?php echo $ped->id; ?>" readonly="readonly" class="validate[required]" style="display:none;" />
+						<input type="hidden" name="hacer" value="herramienta" readonly="readonly" class="validate[required]" style="display:none;" />
 						<button class="btn btn-success">Guardar</button>
 					</div>
 				</form>
@@ -395,7 +395,7 @@
 
 	</div>
 
-	<form action="enviar" method="post" name="estado_pedido" id="estado_pedido" class="validar">
+	<form action="enviar.php" method="post" name="estado_pedido" id="estado_pedido" class="validar">
 		<div class="row">
 			<div class="col-lg-6" >
 				<div class="box_top">
@@ -447,7 +447,7 @@
 					</div>
 					<div class="field">
 						<input type="hidden" name="hacer" id="hacer" value="info_pedido" class="validate[required]" />
-						<input type="hidden" name="folio" id="folio" value="<?php echo $ped->folio; ?>" class="validate[required]" />					
+						<input type="hidden" name="orden_id" id="orden_id" value="<?php echo $ped->id; ?>" class="validate[required]" />
 						<button class="btn btn-success">Enviar</button>
 					</div>				
 				</div>

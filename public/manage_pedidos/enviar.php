@@ -18,8 +18,23 @@ if ( $_POST ) {
 	}
 }
 
+function findOrder($orden_id)
+{
+    $con = conecta();
+    $b = $con->prepare("SELECT * FROM aio_orden WHERE id=:id");
+    $b->bindParam(':id',$orden_id);
+    $b->execute();
+
+    if ($b->rowCount() != 1) {
+        $_SESSION['error'][] = "La orden que se selecciono no existe";
+        header('location:table.php');
+        exit;
+    }
+
+    return $b->fetchObject();
+}
+
 switch ( $hacer ) {
-	
 	case 'insertar':
 
 		//Informacion de la sucursal del usuario logueado
@@ -33,7 +48,7 @@ switch ( $hacer ) {
 		$c->execute();
 		$numero = $c->fetchColumn();
 		//El folio incluye la ID de la sucursal y el numero de flios hechos +1
-		$folio = $sucursal.'-'.str_pad($numero+1, 4, 0, STR_PAD_LEFT); 
+		$folio = $sucursal.'-'.str_pad($numero+1, 4, 0, STR_PAD_LEFT);
 		//////////////////////////////////////////////////////////////////////////////////
 
 		//Si no se uso una empresa registrada
@@ -94,7 +109,9 @@ switch ( $hacer ) {
 
 				//Mensaje de error
 				$_SESSION['error'][] = "El cliente que se selecciono no existe";
-			}else $id_cliente = $empresa_registrada; //Si existe se coloca la id en la variable id de cliente
+			}else{
+                $id_cliente = $empresa_registrada; //Si existe se coloca la id en la variable id de cliente
+            }
 		}
 
 		//Para evitar problemas no se puede escribir en la BD si no existe algun tipo de id de cliente
@@ -125,62 +142,71 @@ switch ( $hacer ) {
 			$i->bindParam(':aprobo',$responsable);
 			$i->bindParam(':diagnostico_observaciones', $diagnostico_observaciones);
 			$i->bindParam(':prioridad',$prioridad);
-			$i->bindParam(':turno',$turno);			
+			$i->bindParam(':turno',$turno);
 			$i->execute();
+            $id_orden = $con->lastInsertId();
 
-			$i = $con->prepare("INSERT INTO aio_orden_personal (folio,id_personal,categoria,empezo,termino,costo) 
+			$i = $con->prepare("INSERT INTO aio_orden_personal 
+                (orden_id,id_personal,categoria,empezo,termino,costo,dia) 
 				VALUES
-				(:folio,:id_personal,'Encargado',:empezo,:termino,0)");
-			$i->bindParam(':folio',$folio);
+				(:orden_id,:id_personal,'Encargado',:empezo,:termino,0,:dia)");
+			$i->bindParam(':orden_id',$id_orden);
 			$i->bindParam(':id_personal',$planeador);
 			$i->bindParam(':empezo',$fecha_orden);
 			$i->bindParam(':termino',$fecha_deseada);
+			$i->bindParam(':dia',$fecha_orden);
 			$i->execute();
 
 			//Mensaje de exito
 			$_SESSION['bien'][] = 'Fue creado sin problemas la orden <b>'.$folio.'</b>';
 		}
-
 	break;
 
 	case 'info_pedido':
+        $orden = findOrder($orden_id);
+
 		///Formato de escritura
 		$trabajo_solicitado 		= htmlentities( addslashes($_POST['trabajo_solicitado']) );
 		$trabajo_realizar			= htmlentities( addslashes($_POST['trabajo_realizar']) );
 		$diagnostico_observaciones 	= htmlentities( addslashes($_POST['diagnostico_observaciones']) );
 
-		$u = $con->prepare("UPDATE aio_orden SET trabajo_solicitado=:trabajo_solicitado, trabajo_realizar=:trabajo_realizar, diagnostico_observaciones=:diagnostico_observaciones, estado_orden=:estado_orden WHERE folio=:folio");
+		$u = $con->prepare("UPDATE aio_orden SET 
+            trabajo_solicitado=:trabajo_solicitado, trabajo_realizar=:trabajo_realizar, diagnostico_observaciones=:diagnostico_observaciones, estado_orden=:estado_orden 
+            WHERE id=:id");
 		$u->bindParam(':trabajo_solicitado',$trabajo_solicitado);
 		$u->bindParam(':trabajo_realizar',$trabajo_realizar);
 		$u->bindParam(':diagnostico_observaciones',$diagnostico_observaciones);
 		$u->bindParam(':estado_orden',$estado_orden);
-		$u->bindParam(':folio',$folio);
+		$u->bindParam(':id',$orden->id);
 		$u->execute();
 
-		$direccion = "info?id=".encriptar($folio);
+		$direccion = "info.php?id=".encriptar($order->folio);
 
-		$_SESSION['bien'][] = 'Se actualizo la orden <b>'.$folio.'</b>';		
+		$_SESSION['bien'][] = 'Se actualizo la orden <b>'.$orden->id.'</b>';
 	break;
 
 	case 'material':
+        $orden = findOrder($orden_id);
 		$cantidad = cleanNumber($cantidad);
 		$costo = cleanNumber($costo);
 
-		$i = $con->prepare("INSERT INTO aio_orden_material (folio,material,cantidad,unidad,costo) VALUES (:folio,:material,:cantidad,:unidad,:costo)");
-		$i->bindParam(':folio',$folio);
+		$i = $con->prepare("INSERT INTO aio_orden_material 
+            (orden_id, material, cantidad, unidad, costo) 
+            VALUES
+            (:orden_id,:material,:cantidad,:unidad,:costo)");
+		$i->bindParam(':orden_id',$orden->id);
 		$i->bindParam(':material', $material);
 		$i->bindParam(':cantidad',$cantidad);
 		$i->bindParam(':unidad',$unidad);
 		$i->bindParam(':costo',$costo);
 		$i->execute();
 
-		$direccion = "info?id=".encriptar($folio);
-
-		//Mensaje de exito
-		$_SESSION['bien'][] = 'Fue ingresado el material a la orden <b>'.$folio.'</b>';
+		$direccion = "info.php?id=".encriptar($orden->id);
+		$_SESSION['bien'][] = 'Fue ingresado el material a la orden <b>'.$orden->folio.'</b>';
 	break;
 
 	case 'trabajador':
+        $orden = findOrder($orden_id);
 		$horas = cleanNumber($horas);
 		$b = $con->prepare("SELECT salario FROM aio_personal WHERE id_usuario=:planeador AND id!=1");
 		$b->bindParam(':planeador',$trabajador);
@@ -188,46 +214,46 @@ switch ( $hacer ) {
 		$r = $b->fetchObject();
 		$costo = cleanNumber($r->salario)*$horas;
 
-		$i = $con->prepare("INSERT INTO aio_orden_personal (folio,id_personal,categoria,dia,horas,costo) VALUES (:folio,:id_personal,:categoria,:dia,:horas,:costo)");
-		$i->bindParam(':folio',$folio);
+		$i = $con->prepare("INSERT INTO aio_orden_personal 
+            (orden_id, id_personal, categoria, dia, horas, costo, empezo, termino) 
+            VALUES 
+            (:orden_id,:id_personal,:categoria,:dia,:horas,:costo, :empezo, :termino)");
+		$i->bindParam(':orden_id',$orden->id);
 		$i->bindParam(':id_personal',$trabajador);
 		$i->bindParam(':categoria',$categoria);
+		$i->bindParam(':empezo',$dia);
+		$i->bindParam(':termino',$dia);
 		$i->bindParam(':dia',$dia);
 		$i->bindParam(':horas',$horas);
 		$i->bindParam(':costo',$costo);
-		$i->execute();	
+		$i->execute();
 
-		$direccion = "info?id=".encriptar($folio);
+		$direccion = "info.php?id=".encriptar($orden->id);
 
 		//Mensaje de exito
-		$_SESSION['bien'][] = "Se actualizo la informacion correspondiente a la orden <i>".$folio."</i>";
+		$_SESSION['bien'][] = "Se actualizo la informacion correspondiente a la orden <i>".$orden->folio."</i>";
 	break;
 
 	case 'herramienta':
+        $orden = findOrder($orden_id);
 		$cantidad = cleanNumber($cantidad);
-		$i = $con->prepare("INSERT INTO aio_orden_herramienta (folio,herramienta,cantidad) VALUES (:folio,:herramienta,:cantidad)");
-		$i->bindParam(':folio',$folio);
+		$i = $con->prepare("INSERT INTO aio_orden_herramienta (orden_id, herramienta, cantidad) VALUES (:order_id,:herramienta,:cantidad)");
+		$i->bindParam(':order_id',$orden->id);
 		$i->bindParam(':herramienta',$herramienta);
 		$i->bindParam(':cantidad',$cantidad);
 		$i->execute();
 
-		$direccion = "info?id=".encriptar($folio);
+		$direccion = "info.php?id=".encriptar($orden->id);
 
 		//Mensaje de exito
-		$_SESSION['bien'][] = 'Fue ingresado la herramienta a la orden <b>'.$folio.'</b>';
+		$_SESSION['bien'][] = 'Fue ingresado la herramienta a la orden <b>'.$orden->folio.'</b>';
 	break;
-
 
 	default:
 		echo 'Ready the beer';
-	break;	
+	break;
 }
 
 
-//Redirigir a la tabla
-header("location:$direccion");
-
-//Limpiar conexion
 $con = '';
-
-?>
+header("location:$direccion");
