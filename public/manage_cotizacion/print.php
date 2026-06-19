@@ -27,12 +27,12 @@ if (!$cot) {
 
 $user_logueado = info_personal($cot->id_usuario_creo);
 $sucursal = sucursal_usuario();
-$datos = array(
+$datos = [
     'para' => $cot->para,
     'atencion' => $cot->atencion,
     'asunto' => $cot->asunto,
     'nota' => $cot->nota,
-);
+];
 
 $row = array();
 $q = $con->prepare("SELECT descripcion, cantidad, unidad, pu, costo FROM aio_cotizacion_conceptos WHERE id_cotizacion=:id_cotizacion");

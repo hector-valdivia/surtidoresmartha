@@ -538,7 +538,7 @@
 									if ( result.hacer == "desbloquear" ){
 										$(location).attr('href','agregar.php?id='+result.id_requisicion);
 									}else if ( result.hacer == 'activar_pdf' ){
-										window.open(result.archivo);
+										window.open('/manage_requisicion/print.php?id='+result.id_requisicion);
 									}
 								}
 							}

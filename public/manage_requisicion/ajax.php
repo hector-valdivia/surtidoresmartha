@@ -1,4 +1,7 @@
 <?php
+	require(__DIR__ . "/../../vendor/autoload.php");
+	use Spipu\Html2Pdf\Html2Pdf;
+
 	session_start();
 	require(__DIR__ . "/../../funciones.php");
 
@@ -178,7 +181,7 @@
 				$data = array(
 					'r' 	   		 => 1,
 					'mensaje' 		 => 'Se actualizo la requisicion',
-					'id_requisicion' => $id_requisicion,
+					'id_requisicion' => encriptar($id_requisicion),
 					'hacer' 		 => 'editar'
 				);
 
@@ -187,7 +190,7 @@
 				$data = array(
 					'r' 	  		 => 0,
 					'mensaje' 		 => $e->getMessage(),
-					'id_requisicion' => $id_requisicion,
+					'id_requisicion' => encriptar($id_requisicion),
 					'hacer'			 => 'editar'
 				);
 			}	
@@ -215,7 +218,7 @@
 				$data = array(
 					'r' 	  	=> 0,
 					'mensaje' 	=> $e->getMessage(),
-					'id_requisicion' 	=> $id_requisicion,
+					'id_requisicion' 	=> encriptar($id_requisicion),
 					'hacer'		=> 'editar_status'
 				);
 			}
@@ -307,7 +310,7 @@
 					$data = array(
 						'r' 	   	 => 1,
 						'mensaje' 	 => 'Se actualizo la requisicion'.$extra,
-						'id_requisicion' 	 => $id_requisicion,
+						'id_requisicion' 	 => encriptar($id_requisicion),
 						'hacer' 		 => 'editar_status'
 					);
 				}
@@ -317,7 +320,7 @@
 				$data = array(
 					'r' 	  	=> 0,
 					'mensaje' 	=> $e->getMessage(),
-					'id_requisicion' 	=> $id_requisicion,
+					'id_requisicion' 	=> encriptar($id_requisicion),
 					'hacer'		=> 'editar_status'
 				);
 			}	
@@ -349,8 +352,8 @@
 				if ($b->fetchColumn() == 0 ) throw new Exception("No existe la requisicion");
 
 				//Desidir si se activa o no
-			 	if ($hacer=='activar_pdf')  $pdf = 'si';
-			 	else $pdf = 'no';
+			 	if ($hacer=='activar_pdf'){ $pdf = 'si'; }
+			 	else{ $pdf = 'no'; }
 
 			 	//Actualizar campo pdf
 			 	$u = $con->prepare('UPDATE aio_requisicion SET pdf=:pdf , autorizo=:autorizo WHERE id=:id LIMIT 1');
@@ -373,21 +376,19 @@
 					ob_start();
 					include('requisicionpdf.php');
 					$html = ob_get_clean();
-					
-					require_once(__DIR__ . "/../../functions/html2pdf/html2pdf.class.php");
 					$archivo = 'Requisicion-'.str_pad($id_requisicion, 4, '0', STR_PAD_LEFT).'.pdf';
 					$html2pdf = new HTML2PDF('P','LETTER','es',array('mL', 'mT', 'mR', 'mB'));
 					$html2pdf->pdf->SetDisplayMode('fullpage');
 					$html2pdf->pdf->SetAuthor('Surtidores Martha');
 					$html2pdf->WriteHTML($html);
 					$html2pdf->setDefaultFont('helvetica');	
-					$html2pdf->Output($archivo,'F');
+					$html2pdf->Output(__DIR__ . $archivo,'F');
 
 				 	//Mensaje de exito
 					$data = array(
 						'r' 	   	 => 1,
 						'mensaje' 	 => 'Ya se encuentra disponible el PDF',
-						'id_requisicion' 	 => $id_requisicion,
+						'id_requisicion' => encriptar($id_requisicion),
 						'hacer' 		 => $hacer,
 						'archivo'	 => $archivo
 					);
@@ -396,7 +397,7 @@
 					$data = array(
 						'r' 	   	 => 1,
 						'mensaje' 	 => 'Se desactivo el PDF',
-						'id_requisicion' 	 => $id_requisicion,
+						'id_requisicion' => encriptar($id_requisicion),
 						'hacer' 		 => $hacer
 					);
 			 	}
@@ -428,35 +429,20 @@
 		 		$b->execute();
 		 		$requi = $b->fetchObject();
 
-				// get the HTML
-				ob_start();
-				include('requisicionpdf.php');
-				$html = ob_get_clean();
-				
-				require_once(__DIR__ . "/../../functions/html2pdf/html2pdf.class.php");
-				$archivo = 'Requisicion-'.str_pad($id_requisicion, 4, '0', STR_PAD_LEFT).'.pdf';
-				$html2pdf = new HTML2PDF('P','LETTER','es',array('mL', 'mT', 'mR', 'mB'));
-				$html2pdf->pdf->SetDisplayMode('fullpage');
-				$html2pdf->pdf->SetAuthor('Surtidores Martha');
-				$html2pdf->WriteHTML($html);
-				$html2pdf->setDefaultFont('helvetica');	
-				$html2pdf->Output($archivo,'F');
-
 			 	//Mensaje de exito
-				$data = array(
-					'r' 	   	 => 1,
-					'mensaje' 	 => 'Ya se encuentra disponible el PDF',
-					'id_requisicion' 	 => $id_requisicion,
-					'hacer' 		 => $hacer,
-					'archivo'	 => $archivo
-				);
+				$data = [
+                    'r' => 1,
+                    'mensaje' => 'Ya se encuentra disponible el PDF',
+                    'id_requisicion' => encriptar($id_requisicion),
+                    'hacer' => $hacer
+                ];
 			}catch( Exception $e){
-				$data = array(
-					'r' 	  	=> 0,
-					'mensaje' 	=> $e->getMessage(),
-					'id_requisicion' 	=> $id_requisicion,
-					'hacer'		=> 'nada'
-				);
+				$data = [
+                    'r' 	  	=> 0,
+                    'mensaje' 	=> $e->getMessage(),
+                    'id_requisicion' => encriptar($id_requisicion),
+                    'hacer'		=> 'nada'
+                ];
 			}
 		break;
 
@@ -495,4 +481,3 @@
 	echo json_encode($data);
 
 	$con = null;
-?>
