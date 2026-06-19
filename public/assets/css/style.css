@@ -938,6 +938,23 @@ table td.tools, table th.tools { width:110px !important; }
 .sorting a.asignar 	{ background-image: url('../img/asignar.png'); }
 .sorting a.edits 	{ background-image: url('../img/edits.png'); }
 
+a.btn-circle {
+	background: #f5f5f5;
+	border: 1px solid #ccc;
+	border-radius: 50%;
+	color: #333;
+	display: inline-block;
+	height: 28px;
+	line-height: 28px;
+	text-align: center;
+	width: 28px;
+}
+
+a.btn-circle:hover {
+	background: #e6e6e6;
+	color: #111;
+}
+
 
 .menu a.edit,
 .menu a.view,

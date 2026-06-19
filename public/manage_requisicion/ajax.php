@@ -1,46 +1,6 @@
-<?php	
-	/*//Enviar cotizacion					
-	$mail = new PHPMailer(); //Generar el objeto de correo
-	// Set PHPMailer to use the sendmail transport
-	$mail->IsSMTP();
-	$mail->SMTPAuth = true;
-	$mail->Host = "s89419.gridserver.com"; // A RELLENAR. Aquí pondremos el SMTP a utilizar. Por ej. mail.midominio.com
-	$mail->Username = "contacto@surtidoresmartha.com"; // A RELLENAR. Email de la cuenta de correo. ej.info@midominio.com La cuenta de correo debe ser creada previamente. 
-	$mail->Password = "/"; // A RELLENAR. Aqui pondremos la contraseña de la cuenta de correo
-	$mail->Port = 587; // Puerto de conexión al servidor de envio. 
-
-	//Set who the message is to be sent from
-	$mail->setFrom("no-replay@surtidoresmartha.com", "Reporte Surtidores Martha");
-	//Set who the message is to be sent to
-	$mail->addAddress( trim("contacto@surtidoresmartha.com") );
-	$mail->addAddress( trim("hect.valdivia@gmail.com") );
-	//Set the subject line
-	$mail->Subject = "Prueba surtidoresmartha";
-	//Activar en el objeto el HTML
-	$mail->IsHTML(true);
-	$mail->SMTPDebug = 1;
-	//Cuerpo del correo
-	$cuerpo_correo = '
-		<h3>Prueba</h3>
-		<p>Solo una prueba</p>
-		<br />
-		<hr>
-	';
-	//Cuerpo del mensaje
-	$mail->Body = $cuerpo_correo;
-	//Replace the plain text body with one created manually
-	$mail->AltBody = 'Probando';
-	if( $mail->Send() ){
-		$arrResult['response'] = 'success';
-	} else {
-		$arrResult['response'] = 'error';
-		echo "There was a problem sending the form.: " . $mail->ErrorInfo;
-		exit;
-	}
-	*/
+<?php
 	session_start();
 	require(__DIR__ . "/../../funciones.php");
-	require_once(__DIR__ . "/../../functions/phpmailer/class.phpmailer.php");
 
 	// Comprobar si la página se cargo con AJAX.
 	if ( strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) != 'xmlhttprequest' ) die( 'No acceda a esta p&aacute;gina directamente desde su navegador.' );
@@ -137,46 +97,6 @@
 				}
 				//Realizamos la escritura
 				$con->commit();
-
-				//Enviar cotizacion					
-				$mail = new PHPMailer(); //Generar el objeto de correo
-				// Set PHPMailer to use the sendmail transport
-				$mail->IsSMTP();
-				$mail->SMTPAuth = true;
-				$mail->Host = "s89419.gridserver.com"; // A RELLENAR. Aquí pondremos el SMTP a utilizar. Por ej. mail.midominio.com
-				$mail->Username = "contacto@surtidoresmartha.com"; // A RELLENAR. Email de la cuenta de correo. ej.info@midominio.com La cuenta de correo debe ser creada previamente. 
-				$mail->Password = "SurtMa54321*/"; // A RELLENAR. Aqui pondremos la contraseña de la cuenta de correo
-				$mail->Port = 587; // Puerto de conexión al servidor de envio. 
-				//Set who the message is to be sent from
-				$mail->setFrom("no-replay@surtidoresmartha.com", "Reporte Surtidores Martha");
-				//Set who the message is to be sent to
-				$mail->addAddress( trim("contacto@surtidoresmartha.com") );
-				$mail->addAddress( trim("hect.valdivia@gmail.com") );
-				//Set the subject line
-				$mail->Subject = "Requisicion surtidoresmartha";
-				//Activar en el objeto el HTML
-				$mail->IsHTML(true);
-				//Cuerpo del correo
-				$cuerpo_correo = '
-					<h3>Requisicion</h3>
-					<p>Ahi una requisicion nueva en el sistema <a href="'._BASE_URL.'/manage_requisicion/agregar.php?id='.encriptar($id_requisicion).'">Ir a la requisicion</a></p>
-					<br />
-					<hr>
-					<table>
-						<tr>
-							<td style="width:200px"><img src="'._BASE_URL.'/assets/img/logopdf.jpg" style="width:90%" ></td>
-							<td sryle="text-align: left;">
-								Sistema Surtidores Martha<br />
-								http://surtidoresmartha.com
-							</td>
-						</tr>
-					</table>
-				';
-				//Cuerpo del mensaje
-				$mail->Body = $cuerpo_correo;
-				//Replace the plain text body with one created manually
-				$mail->AltBody = 'Se creo una nueva requisicion '._BASE_URL.'/manage_requisicion/agregar.php?id='.encriptar($id_requisicion);
-				$mail->send();
 
 				//Exito
 				$data = array(

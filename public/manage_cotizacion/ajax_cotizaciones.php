@@ -43,8 +43,9 @@ $columns = array(
         'db'        => 'id',
         'dt'        => 5,
         'formatter' => function( $id, $row ) {
-            $html = '<a href="agregar.php?id='.encriptar($id).'" class="edit tip" title="Editar">Editar'.$id.'</a>';
-			$html.= '<a href="#"  data-id="'.encriptar($id).'" class="borrar delete tip" title="Borrar">Borrar</a>';
+            $html = '<a href="print.php?id='.encriptar($id).'" target="_blank" class="btn-circle tip" title="PDF"><span class="glyphicon glyphicon-print"></span></a>';
+            $html.= '<a href="agregar.php?id='.encriptar($id).'" class="btn-circle tip" title="Editar"><span class="glyphicon glyphicon-edit"></span></a>';
+			$html.= '<a href="#"  data-id="'.encriptar($id).'" class="btn-circle tip" title="Borrar"><span class="glyphicon glyphicon-trash"></span></a>';
             return $html;
         }
     )
