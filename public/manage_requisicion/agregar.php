@@ -404,7 +404,7 @@
 			<!-- ===================== Informacion de la requisiscion ===================== -->
 			<div class="col-lg-6">
 				<div class="box_top">
-					<h2 class="icon frames">Información de la requisicion</h2>
+					<h2 class="icon frames">Información de la requisición</h2>
 				</div>
 				<div class="box_content padding">
 					<?php if ( $cot->bloqueada == 'si' ): ?>
@@ -432,7 +432,7 @@
 								<select name="sucursal" id="sucursal" class="form-control validate[required]">
 									<option value="">Seleccione</option>
 									<?php 
-										$sucursal_usuario = sucursal($_SESSION['id']);
+										$sucursal_usuario = sucursal();
 										//Generar la seleccion del selectbox
 										if ( !empty($id) ) $seleccione = $cot->id_sucursal;
 										else $seleccione = $r->id_sucursal;
@@ -492,11 +492,11 @@
 
 <!--==================== Le jquery ====================-->
 <?php include(__DIR__ . "/../../modules/js.php"); ?>
-<script type="text/javascript" src="<?php echo _BASE_URL; ?>/assets/js/gritter/jquery.gritter.js"></script>
+<script type="text/javascript" src="/assets/js/gritter/jquery.gritter.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
-<script src="<?php echo _BASE_URL; ?>/assets/js/customrequiest.js"></script>
-<script src="<?php echo _BASE_URL; ?>/assets/js/jquery.confirm.min.js"></script>
-<script src="<?php echo _BASE_URL; ?>/assets/js/jquery.tabletojson.js"></script>
+<script src="/assets/js/customrequiest.js"></script>
+<script src="/assets/js/jquery.confirm.min.js"></script>
+<script src="/assets/js/jquery.tabletojson.js"></script>
 
 
 <script type="text/javascript">
@@ -521,31 +521,23 @@
 				promptPosition : "bottomLeft", 
 				autoPositionUpdate : true,
 				onValidationComplete: function(form, status){
-					if ( status == true ){
-						//Serializar la informacion del form
-						var form = $('#enviar_requisicion').serializeObject();
-
-						//Boton hacer
+					if (status){
+						const form = $('#enviar_requisicion').serializeObject();
 						form.hacer = $("#enviar_form").val();
 
 						//Enviar por ajax
-						$.customRequest(
-							'hacer',
-							form,
-							{
-								onSuccess: function(result) {
-									mensaje(result);
-									if ( result.hacer == "desbloquear" ){
-										$(location).attr('href','agregar.php?id='+result.id_requisicion);
-									}else if ( result.hacer == 'activar_pdf' ){
-										window.open('/manage_requisicion/print.php?id='+result.id_requisicion);
-									}
-								}
-							}
-						);
+						$.customRequest('hacer', form, {
+                            onSuccess: function(result) {
+                                mensaje(result);
+                                if ( result.hacer == "desbloquear" ){
+                                    $(location).attr('href','agregar.php?id='+result.id_requisicion);
+                                }else if ( result.hacer == 'activar_pdf' ){
+                                    window.open('/manage_requisicion/print.php?id='+result.id_requisicion);
+                                }
+                            }
+                        });
 					}
-
-				}//onValidationComplete: function(form, status)		
+				}
 			});
 
 		<?php else: ?>
@@ -554,17 +546,14 @@
 			/*===========================================================*/
 			$(document).on('click', '.status_tipo', function(event) {
 				event.preventDefault();
-				//Obtenemos el valor data-status del dropdown
-				var status = $(this).data('status');
-				//Seleccionamos el titulo
-				var titulo = $(this).parents('.titulo');
-				//Agregamos a la opcion seleccionada la clase selected
+
+                const status = $(this).data('status');
+                const titulo = $(this).parents('.titulo');
+
 				$(this).addClass('selected');
-				//Le quitamos a las demas opciones el valor de selected
 				$(this).parent().siblings().children().removeClass('selected');
-				//Pasamos el varlo de Status al input
 				$(this).parent().parent().siblings('.status').val(status);
-				//Se cambia de clase el titulo para darle el color necesario
+
 				switch (status){
 					case 'aceptado':
 						titulo.attr('class', 'titulo aceptado');
@@ -581,21 +570,18 @@
 			});
 
 			/*===========================================================*/
-			/*	Function estatus de la requisicion completa
+			/*	Function estatus de la requisición completa
 			/*===========================================================*/
 			$(document).on('click', '.status_requisicion', function(event) {
 				event.preventDefault();
-				//Obtenemos el valor data-status del dropdown
-				var status = $(this).data('status');
-				//Seleccionamos el titulo
-				var titulo = $(this).parents('.input');
-				//Agregamos a la opcion seleccionada la clase selected
+				let status = $(this).data('status');
+                let titulo = $(this).parents('.input');
+
 				$(this).addClass('selected');
-				//Le quitamos a las demas opciones el valor de selected
 				$(this).parent().siblings().children().removeClass('selected');
-				//Pasamos el varlo de Status al input
+
 				$('#status_requi').val(status);
-				//Se cambia de clase el titulo para darle el color necesario
+				
 				switch (status){
 					case 'aceptado':
 						titulo.attr('class', 'box_top input aceptado');
@@ -619,43 +605,44 @@
 				promptPosition : "bottomLeft", 
 				autoPositionUpdate : true,
 				onValidationComplete: function(form, status){
-					if ( status == true ){
+					if (status){
 						if ( $('#descripcion').val() != null ){
-							if ( $('#cero').length == false ) {
-								//Boton hacer
-								var hacer = { 'hacer':$("#enviar_requisicion").context.activeElement.value };
-								//Serializar la informacion del form
-								var descripcion = $('#descripcion').serializeObject();
-								var form = $('#enviar_requisicion').serializeObject();
-								var pedido = $('#pedido .req').serializeObject();
-								var requi_status = $('#status_requi').serializeObject();
-								var requi_status_material = $('#pedido .status').serializeObject();							
-								//Se extiendo el obejto pedido en form, y se concatenan en una sola variable
+							if ( $('#cero').length === 0 ) {
+                                const hacer = {'hacer': $("#enviar_requisicion").context.activeElement.value};
+
+                                const descripcion = $('#descripcion').serializeObject();
+                                let form = $('#enviar_requisicion').serializeObject();
+								let pedido = $('#pedido .req').serializeObject();
+								let requi_status = $('#status_requi').serializeObject();
+								let requi_status_material = $('#pedido .status').serializeObject();
+
 								$.extend(form, hacer);
 								$.extend(form, requi_status);
 								$.extend(form,requi_status_material);
 								$.extend(form, descripcion);
 								$.extend(form, pedido);
-								//Enviar por ajax
+
 								$.customRequest('hacer', form, {
 									onSuccess: function(result) {
 										mensaje(result);
-										if ( result.hacer == "bloquear" ){
+										if ( result.hacer === "bloquear" ){
 											$(location).attr('href','agregar.php?id='+result.id_requisicion);
-										}else if ( result.hacer == "editar" ){
+										}else if ( result.hacer === "editar" ){
 											$(location).attr('href','/manage_requisicion/table.php');
 										}else{
 											$('#enviar_requisicion #guardar').replaceWith(
 												$('<button />',{ 'type':'submit', 'class':'btn btn-lg btn-info enviar', 'name':'guardar', 'value':result.hacer, 'text':'Guardar'  })
 											);
 
-											//Regrasa la id de la requisicion resien guardada
-											$('#enviar_requisicion #id_requisicion').val(result.id_requisicion);
-											//Mensaje de exito
+                                            if (result.r == 1){
+                                                $('#enviar_requisicion #id_requisicion').val(result.id);
+                                            }
 										}
 									}
 								});
-							}else alert('No se ah agregado nada a la requisicion');
+							} else {
+                                alert('No se ah agregado nada a la requisicion');
+                            }
 						}
 					}
 
@@ -831,10 +818,10 @@
 			//Editar
 			$(document).on('click', '.editar', function(event) {
 				event.preventDefault();
-				var div = $(this).parent().parent().parent();
-				div .addClass('editando');			
-				var req = eval( "(" +div.find(':input').val()+ ")" );
-				//IVA
+                const div = $(this).parent().parent().parent();
+                div .addClass('editando');
+                const req = eval("(" + div.find(':input').val() + ")");
+                //IVA
 				if ( req.iva == 1.16 ) $('#modal_agregar #iva').prop('checked', true);
 				else $('#modal_agregar #iva').prop('checked', false);
 				$('#modal_agregar #material').val( req.material );

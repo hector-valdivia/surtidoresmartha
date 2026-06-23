@@ -150,6 +150,9 @@
 								</td>
 								<td class="align_left tools center">
 									<a href="editar.php?id=<?php echo encriptar($r->id_usuario); ?>"  target="_blank" class="view tip" title="Editar">Editar</a>
+									<?php if ( $r->nivel != 0 ): ?>
+										<a href="editar_password.php?id=<?php echo encriptar($r->id_usuario); ?>" target="_blank" class="edits tip" title="Cambiar contraseña">Password</a>
+									<?php endif; ?>
 									<?php if ($evitar != 1): ?>
 										<a href="#borrar_<?php echo $r->id_usuario; ?>" class="popup delete tip" title="borrar">borrar</a>
 									<?php endif; ?>

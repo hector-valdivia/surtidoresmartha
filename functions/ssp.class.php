@@ -426,7 +426,8 @@ class SSP {
 			$stmt->execute();
 		}
 		catch (PDOException $e) {
-			self::fatal( "An SQL error occurred: ".$e->getMessage() );
+			error_log("SSP SQL error: ".$e->getMessage());
+			self::fatal( "An SQL error occurred." );
 		}
 
 		// Return all
@@ -517,4 +518,3 @@ class SSP {
 		return $a;
 	}
 }
-

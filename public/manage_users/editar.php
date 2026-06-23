@@ -72,7 +72,7 @@
 	<!-- Form aticulos-->
 	<div class="grid_24">
 		<div class="box_top">
-			<h2 class="icon frames">Editar informacion de <i><?php echo $r->nombre.' '.$r->apellido; ?></i></h2>			
+			<h2 class="icon frames">Editar informacion de <i><?php echo $r->nombre.' '.$r->apellido; ?></i></h2>
 		</div>
 
 		<div class="box_content padding">
@@ -139,18 +139,8 @@
 	           		<div class="field">
 				 		<label class="left">eMail*</label>
 				 		<input type="text" name="email" id="email_agregar" value="<?php echo $r->email; ?>" autocomplete="off" class="medium validate[required,custom[email]] tip-stay" title="Ingrese correo" />
-			   		</div>
-			   				        
-	           		<div class="field">
-				 		<label class="left">Password*</label>
-				 		<input type="password" name="password" id="password" autocomplete="off" class="medium validate[equals[password2]] tip-stay" value="" title="Ingrese Password" />
+						</div>
 					</div>
-	        
-					<div class="field">
-						<label class="left">Confirmar Password*</label>
-						<input type="password" name="password2" id="password2" autocomplete="off" class="medium validate[equals[password]] tip-stay" value="" title="Confirme password" />
-					</div>
-				</div>
 
 				<input type="text" name="id" id="id" value="<?php echo $id_cliente; ?>" readonly="true" class="small validate[required] text-input" style="display:none;" />
 	    		<input type="text" name="hacer" id="hacer" value="editar" readonly="true" class="small validate[required] text-input" style="display:none;" />

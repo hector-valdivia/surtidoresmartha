@@ -126,19 +126,14 @@
 				header("location:table.php");
 			}else{
 
-				if( !empty($password) && !empty($password2) && $password == $password2 ){ //Bloque cuando se requiere cambiar la contraseña
-					$password  = encriptar($password);
-					$password2 = limpiar($password2);
-				}else{ //Bloque donde no se requiere cambio de contraseña
-					$b = $con->prepare("SELECT password,recuperar FROM aio_personal INNER JOIN aio_recuperacion ON aio_recuperacion.id_usuario = aio_personal.id_usuario WHERE aio_personal.id_usuario=:id");
-					$b->bindParam(':id',$id);
-					$b->execute();
-					$r = $b->fetchObject();
+				$b = $con->prepare("SELECT password,recuperar FROM aio_personal INNER JOIN aio_recuperacion ON aio_recuperacion.id_usuario = aio_personal.id_usuario WHERE aio_personal.id_usuario=:id");
+				$b->bindParam(':id',$id);
+				$b->execute();
+				$r = $b->fetchObject();
 
-					//Password anteriores del usuario
-					$password  = $r->password;
-					$password2 = $r->recuperar;
-				}
+				//Password anteriores del usuario
+				$password  = $r->password;
+				$password2 = $r->recuperar;
 
 				//Si no tiene o se le quita acceseso al sistema, se limpia el campo de correo y se coloca un password random
 				if( $acceseso == 0 ){
@@ -181,13 +176,44 @@
 				$u_recovery->bindParam(':id_usuario', $id);
 				$u_recovery->execute();
 
-				//Mensaje de exito				
+				//Mensaje de exito
 				$_SESSION['bien'][] = "La actualizacion del usuario fue correcta";
 			}
-		   
-		break;			
-		
-		case 'borrar':		    	
+
+		break;
+
+		case 'password':
+			$b = $con->prepare("SELECT COUNT(id_usuario) FROM aio_personal WHERE id_usuario=:id AND nivel<>0");
+			$b->bindParam(':id',$id);
+			$b->execute();
+
+			if ( $b->fetchColumn() == 0 ){
+				$_SESSION['error'][] = "El usuario no tiene acceso al sistema";
+				header("location:table.php");
+				exit;
+			}else if( empty($password) || $password != $password2 ){
+				$_SESSION['error'][] = "Los password no son iguales";
+			}else{
+				$password_hash = encriptar($password);
+				$u = $con->prepare("UPDATE aio_personal SET password=:password WHERE id_usuario=:id");
+				$u->bindParam(':password',$password_hash);
+				$u->bindParam(':id',$id);
+				$u->execute();
+
+				$u_recovery = $con->prepare("UPDATE aio_recuperacion SET recuperar=:recuperar WHERE id_usuario=:id_usuario");
+				$u_recovery->bindParam(':recuperar', $password);
+				$u_recovery->bindParam(':id_usuario', $id);
+				$u_recovery->execute();
+
+				$_SESSION['bien'][] = "La contraseña fue actualizada";
+			}
+
+			header("location:editar_password.php?id=".encriptar($id));
+			exit;
+
+		break;
+
+		case 'borrar':
 			if(is_numeric($id)){
 				$d = $con->prepare("DELETE FROM aio_personal WHERE id_usuario=:id");
 				$d->bindParam(':id', $id);

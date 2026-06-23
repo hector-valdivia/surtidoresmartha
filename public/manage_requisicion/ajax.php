@@ -1,8 +1,6 @@
 <?php
+    session_start();
 	require(__DIR__ . "/../../vendor/autoload.php");
-	use Spipu\Html2Pdf\Html2Pdf;
-
-	session_start();
 	require(__DIR__ . "/../../funciones.php");
 
 	// Comprobar si la página se cargo con AJAX.
@@ -49,13 +47,11 @@
 
 		case 'guardar':
 			try {
-				//Fecha de creacion de la requisicion
 				$fecha_creacion = date('Y-m-d');
-				//Nota
 				$motivo = base64_encode($_POST['motivo']);
 
 				$con->beginTransaction();
-				//Insercion de la base de datos de la requisicion
+
 				$i = $con->prepare("INSERT INTO aio_requisicion 
 					(id_sucursal, descripcion,prioridad, solicita, motivo, fecha, status, bloqueada,fecha_creacion)
 					VALUES 
@@ -69,9 +65,8 @@
 				$i->bindParam(':fecha', $fecha);
 				$i->bindParam(':fecha_creacion',$fecha_creacion);
 				$i->execute();
-				//Obtener el id del ultimo valor instertado
+
 				$id_requisicion = $con->lastInsertId();
-				//Cerrar el cursor para preparar la siguiente ejecusion
 				$i->closeCursor();
 
 				//Se prepara la ejecusion
@@ -102,19 +97,21 @@
 				$con->commit();
 
 				//Exito
-				$data = array(
-					'r' 		=> 1,
-					'mensaje' 	=> 'Se guardo la requisicion',
-					'hacer'	  	=> 'editar'
-				);
+				$data = [
+                    'r' 		=> 1,
+                    'id_requisicion' => encriptar($id_requisicion),
+                    'id' => $id_requisicion,
+                    'mensaje' 	=> 'Se guardo la requisicion',
+                    'hacer'	  	=> 'editar'
+                ];
 
 			}catch (Exception $e){
 				try { $con->rollBack(); } catch (Exception $e2) {}
-				$data = array(
-					'r' 	  	=> 0,
-					'mensaje' 	=> $e->getMessage(),
-					'hacer'   	=> 'guardar'
-				);
+				$data = [
+                    'r' 	  	=> 0,
+                    'mensaje' 	=> $e->getMessage(),
+                    'hacer'   	=> 'guardar'
+                ];
 			}
 		break;
 
@@ -175,64 +172,67 @@
 					$i->bindParam(':email',$requi->email);
 					$i->execute();
 				}
-				//Realizamos la escritura
+
 				$con->commit();
-				//Exito
-				$data = array(
-					'r' 	   		 => 1,
-					'mensaje' 		 => 'Se actualizo la requisicion',
-					'id_requisicion' => encriptar($id_requisicion),
-					'hacer' 		 => 'editar'
-				);
+
+
+				$data = [
+                    'r' 	   		 => 1,
+                    'mensaje' 		 => 'Se actualizo la requisicion',
+                    'id' => $id_requisicion,
+                    'id_requisicion' => encriptar($id_requisicion),
+                    'hacer' 		 => 'editar'
+                ];
 
 			}catch (Exception $e){
 				try { $con->rollBack(); } catch (Exception $e2) {}
-				$data = array(
-					'r' 	  		 => 0,
-					'mensaje' 		 => $e->getMessage(),
-					'id_requisicion' => encriptar($id_requisicion),
-					'hacer'			 => 'editar'
-				);
+				$data = [
+                    'r' 	  		 => 0,
+                    'mensaje' 		 => $e->getMessage(),
+                    'id' => $id_requisicion,
+                    'id_requisicion' => encriptar($id_requisicion),
+                    'hacer'			 => 'editar'
+                ];
 			}	
 		break;
 
 		case 'desbloquear':
 			try{
 				$con->beginTransaction();
-				//Insercion de la base de datos de la requisicion
+
 				$u = $con->prepare("UPDATE aio_requisicion SET bloqueada='no' WHERE id=:id");
 				$u->bindParam(':id', $id_requisicion);
 				$u->execute();
-				//Realizamos la escritura
+
 				$con->commit();
-				//Exito
-				$data = array(
-					'r' 	   	 		=> 1,
-					'mensaje' 	 		=> 'Se actualizo la requisicion',
-					'id_requisicion' 	=> encriptar($id_requisicion),
-					'hacer' 		 	=> 'desbloquear'
-				);
+
+				$data = [
+                    'r' 	   	 		=> 1,
+                    'mensaje' 	 		=> 'Se actualizo la requisicion',
+                    'id' => $id_requisicion,
+                    'id_requisicion' 	=> encriptar($id_requisicion),
+                    'hacer' 		 	=> 'desbloquear'
+                ];
 
 			}catch (Exception $e){
 				try { $con->rollBack(); } catch (Exception $e2) {}
-				$data = array(
-					'r' 	  	=> 0,
-					'mensaje' 	=> $e->getMessage(),
-					'id_requisicion' 	=> encriptar($id_requisicion),
-					'hacer'		=> 'editar_status'
-				);
+				$data = [
+                    'r' 	  	=> 0,
+                    'mensaje' 	=> $e->getMessage(),
+                    'id' => $id_requisicion,
+                    'id_requisicion' 	=> encriptar($id_requisicion),
+                    'hacer'		=> 'editar_status'
+                ];
 			}
 		break;
 
 		case 'bloquear':
 		case 'editar_status':
 			try {
-				//Comprobar que existe la requisicion
 				$b = $con->prepare("SELECT COUNT(id) FROM aio_requisicion WHERE id=:id");
 				$b->bindParam(':id',$id_requisicion);
 				$b->execute();
 
-				//Si no existe la requisicion marcar error
 				if ($b->fetchColumn() == 0 ) throw new Exception("No existe la requisicion");
 
 
@@ -296,33 +296,39 @@
 				}
 				//Realizamos la escritura
 				$con->commit();
-				//Exito
+
 				if ( $hacer == 'bloquear' & $status_requi != 'espera' ) {
 					$data = array(
 						'r' 	   	 => 1,
 						'mensaje' 	 => 'Se actualizo la requisicion',
+                        'id' => $id_requisicion,
 						'id_requisicion' 	 => encriptar($id_requisicion),
 						'hacer' 		 => 'bloquear'
 					);
 				}else{
-					if ( $hacer == 'bloquear' && $status_requi == 'espera') $extra = ', <b>pero no se bloqueo ya que sigue la requisicion en espera.</b>';
-					else $extra = '';
-					$data = array(
-						'r' 	   	 => 1,
-						'mensaje' 	 => 'Se actualizo la requisicion'.$extra,
-						'id_requisicion' 	 => encriptar($id_requisicion),
-						'hacer' 		 => 'editar_status'
-					);
+					if ( $hacer == 'bloquear' && $status_requi == 'espera'){
+                        $extra = ', <b>pero no se bloqueo ya que sigue la requisicion en espera.</b>';
+                    } else {
+                        $extra = '';
+                    }
+					$data = [
+                        'r' 	   	 => 1,
+                        'mensaje' 	 => 'Se actualizo la requisicion'.$extra,
+                        'id_requisicion' 	 => encriptar($id_requisicion),
+                        'id' => $id_requisicion,
+                        'hacer' 		 => 'editar_status'
+                    ];
 				}
 
 			}catch (Exception $e){
 				try { $con->rollBack(); } catch (Exception $e2) {}
-				$data = array(
-					'r' 	  	=> 0,
-					'mensaje' 	=> $e->getMessage(),
-					'id_requisicion' 	=> encriptar($id_requisicion),
-					'hacer'		=> 'editar_status'
-				);
+				$data = [
+                    'r' 	  	=> 0,
+                    'mensaje' 	=> $e->getMessage(),
+                    'id' => $id_requisicion,
+                    'id_requisicion' 	=> encriptar($id_requisicion),
+                    'hacer'		=> 'editar_status'
+                ];
 			}	
 		break;
 
@@ -365,50 +371,22 @@
 				//Realizamos la escritura
 				$con->commit();
 
-			 	if ( $hacer == 'activar_pdf' ){
-			 		//Buscar toda la informacion de la requisicion
-			 		$b = $con->prepare("SELECT * FROM aio_requisicion WHERE id=:id LIMIT 1");
-			 		$b->bindParam(':id',$id_requisicion);
-			 		$b->execute();
-			 		$requi = $b->fetchObject();
-
-					// get the HTML
-					ob_start();
-					include('requisicionpdf.php');
-					$html = ob_get_clean();
-					$archivo = 'Requisicion-'.str_pad($id_requisicion, 4, '0', STR_PAD_LEFT).'.pdf';
-					$html2pdf = new HTML2PDF('P','LETTER','es',array('mL', 'mT', 'mR', 'mB'));
-					$html2pdf->pdf->SetDisplayMode('fullpage');
-					$html2pdf->pdf->SetAuthor('Surtidores Martha');
-					$html2pdf->WriteHTML($html);
-					$html2pdf->setDefaultFont('helvetica');	
-					$html2pdf->Output(__DIR__ . $archivo,'F');
-
-				 	//Mensaje de exito
-					$data = array(
-						'r' 	   	 => 1,
-						'mensaje' 	 => 'Ya se encuentra disponible el PDF',
-						'id_requisicion' => encriptar($id_requisicion),
-						'hacer' 		 => $hacer,
-						'archivo'	 => $archivo
-					);
-			 	}else{
-				 	//Mensaje de exito
-					$data = array(
-						'r' 	   	 => 1,
-						'mensaje' 	 => 'Se desactivo el PDF',
-						'id_requisicion' => encriptar($id_requisicion),
-						'hacer' 		 => $hacer
-					);
-			 	}
+                $data = [
+                    'r' 	   	 => 1,
+                    'mensaje' 	 => 'Se desactivo el PDF',
+                    'id' => $id_requisicion,
+                    'id_requisicion' => encriptar($id_requisicion),
+                    'hacer' 		 => $hacer
+                ];
 			}catch( Exception $e){
 				try { $con->rollBack(); } catch (Exception $e2) {}
-				$data = array(
-					'r' 	  	=> 0,
-					'mensaje' 	=> $e->getMessage(),
-					'id_requisicion' 	=> $id_requisicion,
-					'hacer'		=> 'nada'
-				);
+				$data = [
+                    'r' 	  	=> 0,
+                    'mensaje' 	=> $e->getMessage(),
+                    'id' 	=> $id_requisicion,
+                    'id_requisicion' 	=> encriptar($id_requisicion),
+                    'hacer'		=> 'nada'
+                ];
 			}
 		break;
 
@@ -434,6 +412,7 @@
                     'r' => 1,
                     'mensaje' => 'Ya se encuentra disponible el PDF',
                     'id_requisicion' => encriptar($id_requisicion),
+                    'id' => $id_requisicion,
                     'hacer' => $hacer
                 ];
 			}catch( Exception $e){
@@ -441,6 +420,7 @@
                     'r' 	  	=> 0,
                     'mensaje' 	=> $e->getMessage(),
                     'id_requisicion' => encriptar($id_requisicion),
+                    'id' => $id_requisicion,
                     'hacer'		=> 'nada'
                 ];
 			}
