@@ -338,7 +338,7 @@
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default btn-flat" data-dismiss="modal">Cancelar</button>
-						<input type="hidden" name="hacer" id="hacer" value="agregar">
+						<input type="hidden" name="hacer" id="hacer_material" value="agregar">
 						<button type="submit" id="enviar" class="btn btn-primary btn-flat">+ Agregar</button>
 					</div>
 				</form>
@@ -385,10 +385,10 @@
 														<input type="password" name="password" id="password" class="form-control" placeholder="Señor Eber escriba su contaseña">
 													</div>
 													<div class="col-md-3">
-														<button type="submit" class="btn btn-md btn-success enviar" name="guardar" id="enviar_form" value="activar_pdf">Activar PDF</button>
+														<button type="submit" class="btn btn-md btn-success enviar" onclick="onClickSubmit(event, 'activar_pdf')" value="activar_pdf">Activar PDF</button>
 													</div>
 													<div class="col-md-3">
-														<button type="submit" class="btn btn-md btn-warning enviar" name="guardar" id="bloquear" value="desactivar_pdf">Desactivar PDF</button>
+														<button type="submit" class="btn btn-md btn-warning enviar" onclick="onClickSubmit(event, 'desactivar_pdf')" value="desactivar_pdf">Desactivar PDF</button>
 													</div>
 												</div>
 											</div>
@@ -422,7 +422,7 @@
 						</div>
 						<?php if ( user_nivel($nivel=1,$con) ): ?>
 							<div id="controls_informacion" class="field">
-								<button type="submit" class="btn btn-lg btn-warning enviar" name="guardar" id="bloquear" value="desbloquear">Desbloquear</button>
+								<button onclick="onClickSubmit(event, 'desbloquear')" class="btn btn-lg btn-warning enviar">Desbloquear</button>
 							</div>
 						<?php endif; ?>
 					<?php else: ?>
@@ -470,15 +470,16 @@
 						</div>
 						<div id="controls_informacion" class="field">
 							<?php if ( !empty($id) && user_nivel($nivel=1,$con) ): ?>
-								<button type="submit" class="btn btn-lg btn-success enviar" name="guardar" id="enviar_form" value="editar_status">Guardar</button>
-								<button type="submit" class="btn btn-lg btn-warning enviar" name="guardar" id="bloquear" value="bloquear">Guardar y Bloquear</button>
+								<button onclick="onClickSubmit(event, 'editar_status')" class="btn btn-lg btn-success enviar" value="editar_status">Guardar</button>
+								<button onclick="onClickSubmit(event, 'bloquear')" class="btn btn-lg btn-warning enviar" value="bloquear">Guardar y Bloquear</button>
 							<?php elseif ( !empty($id) ): ?>
-								<button type="submit" class="btn btn-lg btn-success enviar" name="guardar" id="enviar_form" value="editar">Guardar</button>
+								<button onclick="onClickSubmit(event, 'editar')" class="btn btn-lg btn-success enviar" value="editar">Guardar</button>
 							<?php else: ?>
-								<button type="submit" class="btn btn-lg btn-success enviar" name="guardar" id="enviar_form" value="guardar">Guardar</button>
+								<button onclick="onClickSubmit(event, 'guardar')" class="btn btn-lg btn-success enviar" value="guardar">Guardar</button>
 							<?php endif; ?>
 						</div>
 					<?php endif; ?>
+					<input type="hidden" id="hacer" name="hacer" value="guardar" />
 					<input type="hidden" name="id_requisicion" id="id_requisicion" value="<?php if ( !empty($id) ) echo $id; ?>">
 				</div>
 			</div>
@@ -500,6 +501,12 @@
 
 
 <script type="text/javascript">
+    function onClickSubmit(e, value) {
+        e.preventDefault();
+        $('#hacer').val(value);
+        $('#enviar_requisicion').submit();
+    }
+
 	$(document).ready(function() {
 		/*===========================================================*/
 		/*	Function mensaje de exito
@@ -523,15 +530,19 @@
 				onValidationComplete: function(form, status){
 					if (status){
 						const form = $('#enviar_requisicion').serializeObject();
-						form.hacer = $("#enviar_form").val();
+                        const hacer = $("#hacer").val();
+						form.hacer = hacer;
+
+                        if (hacer == null){
+                            alert('no vales verga');
+                        }
 
 						//Enviar por ajax
-						$.customRequest('hacer', form, {
+						$.customRequest(hacer, form, {
                             onSuccess: function(result) {
                                 mensaje(result);
-                                if ( result.hacer == "desbloquear" ){
-                                    $(location).attr('href','agregar.php?id='+result.id_requisicion);
-                                }else if ( result.hacer == 'activar_pdf' ){
+                                $(location).attr('href','agregar.php?id='+result.id_requisicion);
+                                if (hacer === 'activar_pdf' ){
                                     window.open('/manage_requisicion/print.php?id='+result.id_requisicion);
                                 }
                             }
@@ -608,7 +619,7 @@
 					if (status){
 						if ( $('#descripcion').val() != null ){
 							if ( $('#cero').length === 0 ) {
-                                const hacer = {'hacer': $("#enviar_requisicion").context.activeElement.value};
+                                const hacer = $("#hacer").val();
 
                                 const descripcion = $('#descripcion').serializeObject();
                                 let form = $('#enviar_requisicion').serializeObject();
@@ -616,13 +627,13 @@
 								let requi_status = $('#status_requi').serializeObject();
 								let requi_status_material = $('#pedido .status').serializeObject();
 
-								$.extend(form, hacer);
+								$.extend(form, { hacer });
 								$.extend(form, requi_status);
 								$.extend(form,requi_status_material);
 								$.extend(form, descripcion);
 								$.extend(form, pedido);
 
-								$.customRequest('hacer', form, {
+								$.customRequest(hacer, form, {
 									onSuccess: function(result) {
 										mensaje(result);
 										if ( result.hacer === "bloquear" ){
@@ -670,7 +681,7 @@
 							var iva = 1;
 							var text_iva = ' (Sin iva)';
 						}
-						var hacer = $('#modal_form_agregar #hacer').val();
+						var hacer = $('#modal_form_agregar #hacer_material').val();
 						var costo = parseFloat( datos.cantidad ) * parseFloat( datos.precio_unitario )*iva;
 						//Extender la clase
 						$.extend( datos, { 'iva':iva} );
@@ -832,7 +843,7 @@
 				$('#modal_agregar #direccion').val( req.direccion );
 				$('#modal_agregar #telefono').val( req.telefono );
 				$('#modal_agregar #email').val( req.email );
-				$('#modal_agregar #hacer').val('editar');
+				$('#modal_agregar #hacer_material').val('editar');
 				$('#modal_agregar #enviar').text('Editar').button("refresh");
 				$('#modal_agregar').modal('show');
 			});
@@ -843,7 +854,7 @@
 				$("#modal_form_agregar").trigger("reset");			
 				$('#modal_agregar #titleAgregar').html('Agregar a la cotización');
 				$('#modal_agregar #enviar').text('+Agregar').button("refresh");
-				$('#modal_form_agregar #hacer').val('agregar');
+				$('#modal_form_agregar #hacer_material').val('agregar');
 				$('#modal_form_agregar').validationEngine('hideAll');
 				$('#pedido').find('.editando').removeClass('editando');
 			});

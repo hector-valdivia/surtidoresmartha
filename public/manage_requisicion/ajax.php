@@ -373,7 +373,7 @@
 
                 $data = [
                     'r' 	   	 => 1,
-                    'mensaje' 	 => 'Se desactivo el PDF',
+                    'mensaje' 	 => $hacer == 'activar_pdf' ? 'Se activo el PDF' : 'Se desactivo el PDF',
                     'id' => $id_requisicion,
                     'id_requisicion' => encriptar($id_requisicion),
                     'hacer' 		 => $hacer
